@@ -5,6 +5,7 @@ import imagescience.image.Coordinates;
 import imagescience.image.Dimensions;
 import imagescience.image.Image;
 import imagescience.transform.Embed;
+
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Panel;

@@ -5,6 +5,7 @@ import ij.plugin.PlugIn;
 import imagescience.image.Coordinates;
 import imagescience.image.Image;
 import imagescience.transform.Crop;
+
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.WindowEvent;

@@ -4,6 +4,7 @@ import ij.plugin.PlugIn;
 import imagescience.image.Axes;
 import imagescience.image.Image;
 import imagescience.transform.Mirror;
+
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Panel;

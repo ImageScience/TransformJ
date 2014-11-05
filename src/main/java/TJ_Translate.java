@@ -3,6 +3,7 @@ import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 import imagescience.image.Image;
 import imagescience.transform.Translate;
+
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Panel;

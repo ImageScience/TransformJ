@@ -8,6 +8,7 @@ import ij.process.LUT;
 import imagescience.image.Image;
 import imagescience.utility.I5DResource;
 import imagescience.utility.ImageScience;
+
 import java.awt.image.ColorModel;
 import java.awt.image.DirectColorModel;
 import java.awt.image.IndexColorModel;

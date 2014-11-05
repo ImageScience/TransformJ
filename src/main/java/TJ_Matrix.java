@@ -1,7 +1,11 @@
 import ij.IJ;
-import ij.gui.GenericDialog;
 import ij.gui.GUI;
+import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
+import imagescience.image.Axes;
+import imagescience.transform.Transform;
+import imagescience.utility.Formatter;
+
 import java.awt.Button;
 import java.awt.Dialog;
 import java.awt.FileDialog;
@@ -30,9 +34,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import imagescience.image.Axes;
-import imagescience.transform.Transform;
-import imagescience.utility.Formatter;
 
 public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusListener, WindowListener {
 	
