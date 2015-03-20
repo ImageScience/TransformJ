@@ -174,17 +174,17 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 		return file;
 	}
 	
-	Transform get() {
+	public Transform get() {
 		
 		return tfm.duplicate();
 	}
 	
-	void set(final Transform a) {
+	public void set(final Transform a) {
 		
 		tfm.set(a);
 	}
 	
-	void load(final String file) {
+	public void load(final String file) {
 		
 		// Read lines:
 		final Vector lines = new Vector(10,10);
@@ -231,7 +231,7 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 		tfm.set(matrix);
 	}
 	
-	void save(final String file) {
+	public void save(final String file) {
 		
 		try {
 			final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
