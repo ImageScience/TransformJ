@@ -16,7 +16,7 @@ import java.awt.image.IndexColorModel;
 public final class TJ {
 	
 	private static final String NAME = "TransformJ";
-	private static final String VERSION = "2.8.0";
+	private static final String VERSION = "2.8.1";
 	private static final String MINIJVERSION = "1.44a";
 	private static final String MINISVERSION = "2.4.0";
 	
