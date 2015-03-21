@@ -5,6 +5,7 @@ import ij.WindowManager;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
 import ij.process.LUT;
+
 import imagescience.image.Image;
 import imagescience.utility.I5DResource;
 import imagescience.utility.ImageScience;
@@ -16,7 +17,7 @@ import java.awt.image.IndexColorModel;
 public final class TJ {
 	
 	private static final String NAME = "TransformJ";
-	private static final String VERSION = "2.8.0";
+	private static final String VERSION = "2.8.1";
 	private static final String MINIJVERSION = "1.44a";
 	private static final String MINISVERSION = "2.4.0";
 	
