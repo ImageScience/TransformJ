@@ -17,13 +17,19 @@ import java.awt.image.IndexColorModel;
 public final class TJ {
 	
 	private static final String NAME = "TransformJ";
-	private static final String VERSION = "2.8.1";
+	private static final String VERSION = lookupVersion();
 	private static final String MINIJVERSION = "1.44a";
 	private static final String MINISVERSION = "2.4.0";
 	
 	public static String name() { return NAME; }
 	
 	public static String version() { return VERSION; }
+	
+	private static String lookupVersion() {
+		final String version =
+				TJ.class.getPackage().getImplementationVersion();
+				return version == null ? "DEV" : version;
+	}
 	
 	static boolean libcheck() {
 		
