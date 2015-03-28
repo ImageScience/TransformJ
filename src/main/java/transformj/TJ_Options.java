@@ -1,3 +1,5 @@
+package transformj;
+
 import ij.Prefs;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
@@ -21,7 +23,7 @@ public class TJ_Options implements PlugIn, WindowListener {
 	
 	public void run(String arg) {
 		
-		if (!TJ.libcheck()) return;
+		if (!TJ.check()) return;
 		
 		TJ.log(TJ.name()+" "+TJ.version()+": Options");
 		

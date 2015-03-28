@@ -1,7 +1,10 @@
+package transformj;
+
 import ij.IJ;
-import ij.gui.GUI;
 import ij.gui.GenericDialog;
+import ij.gui.GUI;
 import ij.plugin.PlugIn;
+
 import imagescience.image.Axes;
 import imagescience.transform.Transform;
 import imagescience.utility.Formatter;
@@ -70,7 +73,7 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 	
 	public void run(String arg) {
 		
-		if (!TJ.libcheck()) return;
+		if (!TJ.check()) return;
 		
 		TJ.log(TJ.name()+" "+TJ.version()+": Matrix");
 		
@@ -187,7 +190,7 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 	public void load(final String file) {
 		
 		// Read lines:
-		final Vector lines = new Vector(10,10);
+		final Vector<String> lines = new Vector<String>();
 		String line = null;
 		try {
 			final BufferedReader br = new BufferedReader(new FileReader(file));
@@ -209,12 +212,12 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 		if (lines.size() != 4)
 			throw new IllegalArgumentException("File "+file+" does not contain a 4 x 4 matrix");
 		String delim = "\t";
-		line = (String)lines.get(0);
+		line = lines.get(0);
 		if (line.indexOf(",") >= 0) delim = ",";
 		else if (line.indexOf(" ") >= 0) delim = " ";
 		final double[][] matrix = new double[4][4];
 		for (int r=0; r<4; ++r) {
-			line = (String)lines.get(r);
+			line = lines.get(r);
 			final StringTokenizer st = new StringTokenizer(line,delim);
 			if (st.countTokens() != 4)
 				throw new IllegalArgumentException("File "+file+" does not contain a 4 x 4 matrix");

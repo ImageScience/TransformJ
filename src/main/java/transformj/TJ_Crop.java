@@ -1,7 +1,10 @@
+package transformj;
+
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
+
 import imagescience.image.Coordinates;
 import imagescience.image.Image;
 import imagescience.transform.Crop;
@@ -23,7 +26,7 @@ public class TJ_Crop implements PlugIn, WindowListener {
 	
 	public void run(String arg) {
 		
-		if (!TJ.libcheck()) return;
+		if (!TJ.check()) return;
 		final ImagePlus imp = TJ.imageplus();
 		if (imp == null) return;
 		

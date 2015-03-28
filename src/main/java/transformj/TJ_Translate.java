@@ -1,6 +1,9 @@
+package transformj;
+
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
+
 import imagescience.image.Image;
 import imagescience.transform.Translate;
 
@@ -33,7 +36,7 @@ public class TJ_Translate implements PlugIn, WindowListener {
 	
 	public void run(String arg) {
 		
-		if (!TJ.libcheck()) return;
+		if (!TJ.check()) return;
 		final ImagePlus imp = TJ.imageplus();
 		if (imp == null) return;
 		

@@ -1,6 +1,9 @@
+package transformj;
+
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
+
 import imagescience.image.Image;
 import imagescience.transform.Scale;
 
@@ -16,6 +19,7 @@ public class TJ_Scale implements PlugIn, WindowListener {
 	private static String xfactor = "1.0";
 	private static String yfactor = "1.0";
 	private static String zfactor = "1.0";
+	private static String tfactor = "1.0";
 	
 	private static final String[] schemes = {
 		"nearest neighbor",
@@ -31,7 +35,7 @@ public class TJ_Scale implements PlugIn, WindowListener {
 	
 	public void run(String arg) {
 		
-		if (!TJ.libcheck()) return;
+		if (!TJ.check()) return;
 		final ImagePlus imp = TJ.imageplus();
 		if (imp == null) return;
 		
@@ -41,6 +45,7 @@ public class TJ_Scale implements PlugIn, WindowListener {
 		gd.addStringField("x-factor for scaling:",xfactor);
 		gd.addStringField("y-factor for scaling:",yfactor);
 		gd.addStringField("z-factor for scaling:",zfactor);
+		gd.addStringField("t-factor for scaling:",tfactor);
 		gd.addPanel(new Panel(),GridBagConstraints.WEST,new Insets(0,0,0,0));
 		gd.addChoice("Interpolation scheme:",schemes,schemes[scheme]);
 		
@@ -56,9 +61,10 @@ public class TJ_Scale implements PlugIn, WindowListener {
 		xfactor = gd.getNextString();
 		yfactor = gd.getNextString();
 		zfactor = gd.getNextString();
+		tfactor = gd.getNextString();
 		scheme = gd.getNextChoiceIndex();
 		
-		(new TJScale()).run(imp,xfactor,yfactor,zfactor,scheme);
+		(new TJScale()).run(imp,xfactor,yfactor,zfactor,tfactor,scheme);
 	}
 	
 	public void windowActivated(final WindowEvent e) { }
@@ -88,6 +94,7 @@ class TJScale {
 		final String xfactor,
 		final String yfactor,
 		final String zfactor,
+		final String tfactor,
 		final int scheme
 	) {
 		
@@ -104,6 +111,8 @@ class TJScale {
 			catch (Exception e) { throw new IllegalArgumentException("Invalid y-factor for scaling"); }
 			try { zf = Double.parseDouble(zfactor); }
 			catch (Exception e) { throw new IllegalArgumentException("Invalid z-factor for scaling"); }
+			try { tf = Double.parseDouble(tfactor); }
+			catch (Exception e) { throw new IllegalArgumentException("Invalid t-factor for scaling"); }
 			int ischeme = Scale.NEAREST;
 			switch (scheme) {
 				case 0: ischeme = Scale.NEAREST; break;

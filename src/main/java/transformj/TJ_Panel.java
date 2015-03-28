@@ -1,3 +1,5 @@
+package transformj;
+
 import ij.IJ;
 import ij.gui.GUI;
 import ij.plugin.PlugIn;
@@ -27,7 +29,7 @@ public class TJ_Panel implements PlugIn, ActionListener, WindowListener {
 	
 	public void run(String arg) {
 		
-		if (!TJ.libcheck()) return;
+		if (!TJ.check()) return;
 		
 		TJ.log(TJ.name()+" "+TJ.version()+": Panel");
 		

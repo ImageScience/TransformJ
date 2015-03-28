@@ -1,7 +1,10 @@
+package transformj;
+
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
+
 import imagescience.image.Image;
 import imagescience.transform.Affine;
 import imagescience.transform.Transform;
@@ -46,7 +49,7 @@ public class TJ_Affine implements PlugIn, ActionListener, WindowListener {
 	
 	public void run(String arg) {
 		
-		if (!TJ.libcheck()) return;
+		if (!TJ.check()) return;
 		final ImagePlus imp = TJ.imageplus();
 		if (imp == null) return;
 		

@@ -1,3 +1,5 @@
+package transformj;
+
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
@@ -16,27 +18,34 @@ import java.awt.image.IndexColorModel;
 
 public final class TJ {
 	
-	private static final String NAME = "TransformJ";
-	private static final String VERSION = "2.8.1";
-	private static final String MINIJVERSION = "1.44a";
-	private static final String MINISVERSION = "2.4.0";
-	
-	public static String name() { return NAME; }
-	
-	public static String version() { return VERSION; }
-	
-	static boolean libcheck() {
+	public static String name() {
 		
-		if (IJ.getVersion().compareTo(MINIJVERSION) < 0) {
-			error("This plugin requires ImageJ version "+MINIJVERSION+" or higher");
+		return "TransformJ";
+	}
+	
+	public static String version() {
+		
+		final String version = TJ.class.getPackage().getImplementationVersion();
+		
+		return (version == null) ? "DEV" : version;
+	}
+	
+	private static final String MINIMUM_IMAGEJ_VERSION = "1.44a";
+		
+	private static final String MINIMUM_IMAGESCIENCE_VERSION = "2.4.0";
+	
+	static boolean check() {
+		
+		if (IJ.getVersion().compareTo(MINIMUM_IMAGEJ_VERSION) < 0) {
+			error("This plugin requires ImageJ version "+MINIMUM_IMAGEJ_VERSION+" or higher");
 			return false;
 		}
 		
 		try {
-			if (ImageScience.version().compareTo(MINISVERSION) < 0)
+			if (ImageScience.version().compareTo(MINIMUM_IMAGESCIENCE_VERSION) < 0)
 			throw new IllegalStateException();
 		} catch (Throwable e) {
-			error("This plugin requires ImageScience version "+MINISVERSION+" or higher");
+			error("This plugin requires ImageScience version "+MINIMUM_IMAGESCIENCE_VERSION+" or higher");
 			return false;
 		}
 		
@@ -209,7 +218,7 @@ public final class TJ {
 	
 	static void error(final String message) {
 		
-		IJ.showMessage(NAME+": Error",message+".");
+		IJ.showMessage(name()+": Error",message+".");
 		IJ.showProgress(1);
 		IJ.showStatus("");
 	}
