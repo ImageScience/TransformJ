@@ -16,10 +16,10 @@ public class TJ_Options implements PlugIn, WindowListener {
 	static boolean adopt = Prefs.get("tj.adopt",true);
 	static boolean close = Prefs.get("tj.close",false);
 	static boolean save = Prefs.get("tj.save",false);
-	static boolean pgs = Prefs.get("tj.pgs",true);
+	static boolean progress = Prefs.get("tj.progress",true);
 	static boolean log = Prefs.get("tj.log",false);
 	
-	private static Point pos = new Point(-1,-1);
+	private static Point position = new Point(-1,-1);
 	
 	public void run(String arg) {
 		
@@ -32,13 +32,13 @@ public class TJ_Options implements PlugIn, WindowListener {
 		gd.addCheckbox(" Adopt brightness/contrast from input images"+space,adopt);
 		gd.addCheckbox(" Close input images after transforming"+space,close);
 		gd.addCheckbox(" Save result images before closing"+space,save);
-		gd.addCheckbox(" Progress indication"+space,pgs);
+		gd.addCheckbox(" Progress indication"+space,progress);
 		gd.addCheckbox(" Log messaging"+space,log);
 		gd.addPanel(new Panel(),GridBagConstraints.EAST,new Insets(0,0,0,0));
 		
-		if (pos.x >= 0 && pos.y >= 0) {
+		if (position.x >= 0 && position.y >= 0) {
 			gd.centerDialog(false);
-			gd.setLocation(pos);
+			gd.setLocation(position);
 		} else gd.centerDialog(true);
 		gd.addWindowListener(this);
 		gd.showDialog();
@@ -48,13 +48,13 @@ public class TJ_Options implements PlugIn, WindowListener {
 		adopt = gd.getNextBoolean();
 		close = gd.getNextBoolean();
 		save = gd.getNextBoolean();
-		pgs = gd.getNextBoolean();
+		progress = gd.getNextBoolean();
 		log = gd.getNextBoolean();
 		
 		Prefs.set("tj.adopt",adopt);
 		Prefs.set("tj.close",close);
 		Prefs.set("tj.save",save);
-		Prefs.set("tj.pgs",pgs);
+		Prefs.set("tj.progress",progress);
 		Prefs.set("tj.log",log);
 		
 		if (adopt) TJ.log("Adopting brightness/contrast from input images");
@@ -66,7 +66,7 @@ public class TJ_Options implements PlugIn, WindowListener {
 		if (save) TJ.log("Asking to save result images before closing");
 		else TJ.log("Closing result images without asking to save");
 		
-		if (pgs) TJ.log("Enabling progress indication");
+		if (progress) TJ.log("Enabling progress indication");
 		else TJ.log("Disabling progress indication");
 		
 		if (log) TJ.log("Enabling log messaging");
@@ -77,8 +77,8 @@ public class TJ_Options implements PlugIn, WindowListener {
 	
 	public void windowClosed(final WindowEvent e) {
 		
-		pos.x = e.getWindow().getX();
-		pos.y = e.getWindow().getY();
+		position.x = e.getWindow().getX();
+		position.y = e.getWindow().getY();
 	}
 	
 	public void windowClosing(final WindowEvent e) { }

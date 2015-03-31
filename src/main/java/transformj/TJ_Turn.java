@@ -15,47 +15,49 @@ public class TJ_Turn implements PlugIn, WindowListener {
 	
 	private static final String[] angles = {"0","90","180","270"};
 	
-	private static int zindex = 0;
-	private static int yindex = 0;
-	private static int xindex = 0;
+	private static int zIndex = 0;
+	private static int yIndex = 0;
+	private static int xIndex = 0;
 	
-	private static Point pos = new Point(-1,-1);
+	private static Point position = new Point(-1,-1);
 	
 	public void run(String arg) {
 		
 		if (!TJ.check()) return;
-		final ImagePlus imp = TJ.imageplus();
-		if (imp == null) return;
+		final ImagePlus image = TJ.imageplus();
+		if (image == null) return;
 		
 		TJ.log(TJ.name()+" "+TJ.version()+": Turn");
 		
 		GenericDialog gd = new GenericDialog(TJ.name()+": Turn");
-		gd.addChoice("z-angle (degrees):",angles,angles[zindex]);
-		gd.addChoice("y-angle (degrees):",angles,angles[yindex]);
-		gd.addChoice("x-angle (degrees):",angles,angles[xindex]);
+		gd.setInsets(0,0,0);
+		gd.addMessage("Turning angles in degrees:");
+		gd.addChoice("z-Angle:",angles,angles[zIndex]);
+		gd.addChoice("y-Angle:",angles,angles[yIndex]);
+		gd.addChoice("x-Angle:",angles,angles[xIndex]);
 		
-		if (pos.x >= 0 && pos.y >= 0) {
+		if (position.x >= 0 && position.y >= 0) {
 			gd.centerDialog(false);
-			gd.setLocation(pos);
+			gd.setLocation(position);
 		} else gd.centerDialog(true);
 		gd.addWindowListener(this);
 		gd.showDialog();
 		
 		if (gd.wasCanceled()) return;
 		
-		zindex = gd.getNextChoiceIndex();
-		yindex = gd.getNextChoiceIndex();
-		xindex = gd.getNextChoiceIndex();
+		zIndex = gd.getNextChoiceIndex();
+		yIndex = gd.getNextChoiceIndex();
+		xIndex = gd.getNextChoiceIndex();
 		
-		(new TJTurn()).run(imp,zindex,yindex,xindex);
+		(new TJTurn()).run(image,zIndex,yIndex,xIndex);
 	}
 	
 	public void windowActivated(final WindowEvent e) { }
 	
 	public void windowClosed(final WindowEvent e) {
 		
-		pos.x = e.getWindow().getX();
-		pos.y = e.getWindow().getY();
+		position.x = e.getWindow().getX();
+		position.y = e.getWindow().getY();
 	}
 	
 	public void windowClosing(final WindowEvent e) { }
@@ -73,20 +75,20 @@ public class TJ_Turn implements PlugIn, WindowListener {
 class TJTurn {
 	
 	void run(
-		final ImagePlus imp,
-		final int zindex,
-		final int yindex,
-		final int xindex
+		final ImagePlus image,
+		final int zIndex,
+		final int yIndex,
+		final int xIndex
 	) {
 		
 		try {
-			final Image img = Image.wrap(imp);
+			final Image input = Image.wrap(image);
 			final Turn turner = new Turn();
 			turner.messenger.log(TJ_Options.log);
-			turner.messenger.status(TJ_Options.pgs);
-			turner.progressor.display(TJ_Options.pgs);
-			final Image newimg = turner.run(img,zindex,yindex,xindex);
-			TJ.show(newimg,imp);
+			turner.messenger.status(TJ_Options.progress);
+			turner.progressor.display(TJ_Options.progress);
+			final Image output = turner.run(input,zIndex,yIndex,xIndex);
+			TJ.show(output,image);
 			
 		} catch (OutOfMemoryError e) {
 			TJ.error("Not enough memory for this operation");

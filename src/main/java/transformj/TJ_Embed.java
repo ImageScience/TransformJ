@@ -18,76 +18,90 @@ import java.awt.event.WindowListener;
 
 public class TJ_Embed implements PlugIn, WindowListener {
 	
-	private static int newxdim = 1024;
-	private static int newydim = 1024;
-	private static int newzdim = 1;
-	private static int newtdim = 1;
-	private static int newcdim = 1;
+	private static int xSize = 1024;
+	private static int ySize = 1024;
+	private static int zSize = 1;
+	private static int tSize = 1;
+	private static int cSize = 1;
 	
-	private static int xpos = 0;
-	private static int ypos = 0;
-	private static int zpos = 1;
-	private static int tpos = 1;
-	private static int cpos = 1;
+	private static int xPosition = 0;
+	private static int yPosition = 0;
+	private static int zPosition = 1;
+	private static int tPosition = 1;
+	private static int cPosition = 1;
 	
-	private static final String[] fillings = { "zero", "minimum", "maximum", "repeat", "mirror", "clamp" };
 	private static int filling = 0;
 	
-	private static Point pos = new Point(-1,-1);
+	private static Point position = new Point(-1,-1);
 	
 	public void run(String arg) {
 		
 		if (!TJ.check()) return;
-		final ImagePlus imp = TJ.imageplus();
-		if (imp == null) return;
+		final ImagePlus image = TJ.imageplus();
+		if (image == null) return;
 		
 		TJ.log(TJ.name()+" "+TJ.version()+": Embed");
 		
-		GenericDialog gd = new GenericDialog(TJ.name()+": Embed");
-		gd.addNumericField("x-size of new image:",newxdim,0);
-		gd.addNumericField("y-size of new image:",newydim,0);
-		gd.addNumericField("z-size of new image:",newzdim,0);
-		gd.addNumericField("t-size of new image:",newtdim,0);
-		gd.addNumericField("c-size of new image:",newcdim,0);
-		gd.addPanel(new Panel(),GridBagConstraints.WEST,new Insets(6,0,0,0));
-		gd.addNumericField("x-position of input image:",xpos,0);
-		gd.addNumericField("y-position of input image:",ypos,0);
-		gd.addNumericField("z-position of input image:",zpos,0);
-		gd.addNumericField("t-position of input image:",tpos,0);
-		gd.addNumericField("c-position of input image:",cpos,0);
-		gd.addPanel(new Panel(),GridBagConstraints.WEST,new Insets(0,0,0,0));
-		gd.addChoice("Background filling:",fillings,fillings[filling]);
+		TJ.options();
 		
-		if (pos.x >= 0 && pos.y >= 0) {
+		GenericDialog gd = new GenericDialog(TJ.name()+": Embed");
+		gd.setInsets(0,0,5);
+		gd.addMessage("Size of output image:");
+		gd.setInsets(0,0,5);
+		gd.addNumericField("x-Size:",xSize,0,6,"pixels");
+		gd.setInsets(0,0,5);
+		gd.addNumericField("y-Size:",ySize,0,6,"pixels");
+		gd.setInsets(0,0,5);
+		gd.addNumericField("z-Size:",zSize,0,6,"slices");
+		gd.setInsets(0,0,5);
+		gd.addNumericField("t-Size:",tSize,0,6,"frames");
+		gd.setInsets(0,0,5);
+		gd.addNumericField("c-Size:",cSize,0,6,"channels");
+		gd.setInsets(10,0,5);
+		gd.addMessage("Position of input image:");
+		gd.setInsets(0,0,5);
+		gd.addNumericField("x-Position:",xPosition,0,6,"pixels");
+		gd.setInsets(0,0,5);
+		gd.addNumericField("y-Position:",yPosition,0,6,"pixels");
+		gd.setInsets(0,0,5);
+		gd.addNumericField("z-Position:",zPosition,0,6,"slices");
+		gd.setInsets(0,0,5);
+		gd.addNumericField("t-Position:",tPosition,0,6,"frames");
+		gd.setInsets(0,0,5);
+		gd.addNumericField("c-Position:",cPosition,0,6,"channels");
+		gd.setInsets(15,0,5);
+		gd.addChoice("Background:",TJ.fillings,TJ.fillings[filling]);
+		
+		if (position.x >= 0 && position.y >= 0) {
 			gd.centerDialog(false);
-			gd.setLocation(pos);
+			gd.setLocation(position);
 		} else gd.centerDialog(true);
 		gd.addWindowListener(this);
 		gd.showDialog();
 		
 		if (gd.wasCanceled()) return;
 		
-		newxdim = (int)gd.getNextNumber();
-		newydim = (int)gd.getNextNumber();
-		newzdim = (int)gd.getNextNumber();
-		newtdim = (int)gd.getNextNumber();
-		newcdim = (int)gd.getNextNumber();
-		xpos = (int)gd.getNextNumber();
-		ypos = (int)gd.getNextNumber();
-		zpos = (int)gd.getNextNumber();
-		tpos = (int)gd.getNextNumber();
-		cpos = (int)gd.getNextNumber();
+		xSize = (int)gd.getNextNumber();
+		ySize = (int)gd.getNextNumber();
+		zSize = (int)gd.getNextNumber();
+		tSize = (int)gd.getNextNumber();
+		cSize = (int)gd.getNextNumber();
+		xPosition = (int)gd.getNextNumber();
+		yPosition = (int)gd.getNextNumber();
+		zPosition = (int)gd.getNextNumber();
+		tPosition = (int)gd.getNextNumber();
+		cPosition = (int)gd.getNextNumber();
 		filling = gd.getNextChoiceIndex();
 		
-		(new TJEmbed()).run(imp,newxdim,newydim,newzdim,newtdim,newcdim,xpos,ypos,zpos,tpos,cpos,filling);
+		(new TJEmbed()).run(image,xSize,ySize,zSize,tSize,cSize,xPosition,yPosition,zPosition,tPosition,cPosition,filling);
 	}
 	
 	public void windowActivated(final WindowEvent e) { }
 	
 	public void windowClosed(final WindowEvent e) {
 		
-		pos.x = e.getWindow().getX();
-		pos.y = e.getWindow().getY();
+		position.x = e.getWindow().getX();
+		position.y = e.getWindow().getY();
 	}
 	
 	public void windowClosing(final WindowEvent e) { }
@@ -105,44 +119,44 @@ public class TJ_Embed implements PlugIn, WindowListener {
 class TJEmbed {
 	
 	void run(
-		final ImagePlus imp,
-		final int newxdim,
-		final int newydim,
-		final int newzdim,
-		final int newtdim,
-		final int newcdim,
-		final int xpos,
-		final int ypos,
-		final int zpos,
-		final int tpos,
-		final int cpos,
+		final ImagePlus image,
+		final int xSize,
+		final int ySize,
+		final int zSize,
+		final int tSize,
+		final int cSize,
+		final int xPosition,
+		final int yPosition,
+		final int zPosition,
+		final int tPosition,
+		final int cPosition,
 		final int filling
 	) {
 		
 		try {
-			final Image img = Image.wrap(imp);
+			final Image input = Image.wrap(image);
 			final Embed embedder = new Embed();
 			embedder.messenger.log(TJ_Options.log);
-			embedder.messenger.status(TJ_Options.pgs);
-			embedder.progressor.display(TJ_Options.pgs);
-			int filltype = Embed.ZERO;
+			embedder.messenger.status(TJ_Options.progress);
+			embedder.progressor.display(TJ_Options.progress);
+			int scheme = Embed.ZERO;
 			switch (filling) {
-				case 0: filltype = Embed.ZERO; break;
-				case 1: filltype = Embed.MINIMUM; break;
-				case 2: filltype = Embed.MAXIMUM; break;
-				case 3: filltype = Embed.REPEAT; break;
-				case 4: filltype = Embed.MIRROR; break;
-				case 5: filltype = Embed.CLAMP; break;
+				case 0: scheme = Embed.ZERO; break;
+				case 1: scheme = Embed.MINIMUM; break;
+				case 2: scheme = Embed.MAXIMUM; break;
+				case 3: scheme = Embed.REPEAT; break;
+				case 4: scheme = Embed.MIRROR; break;
+				case 5: scheme = Embed.CLAMP; break;
 			}
-			if (newxdim < 1) throw new IllegalArgumentException("Zero or negative x-size for new image");
-			if (newydim < 1) throw new IllegalArgumentException("Zero or negative y-size for new image");
-			if (newzdim < 1) throw new IllegalArgumentException("Zero or negative z-size for new image");
-			if (newtdim < 1) throw new IllegalArgumentException("Zero or negative t-size for new image");
-			if (newcdim < 1) throw new IllegalArgumentException("Zero or negative c-size for new image");
-			final Dimensions newdims = new Dimensions(newxdim,newydim,newzdim,newtdim,newcdim);
-			final Coordinates inpos = new Coordinates(xpos,ypos,zpos-1,tpos-1,cpos-1);
-			final Image newimg = embedder.run(img,newdims,inpos,filltype);
-			TJ.show(newimg,imp,mapchan(img.dimensions(),newdims,inpos,filling));
+			if (xSize < 1) throw new IllegalArgumentException("Zero or negative x-size for output image");
+			if (ySize < 1) throw new IllegalArgumentException("Zero or negative y-size for output image");
+			if (zSize < 1) throw new IllegalArgumentException("Zero or negative z-size for output image");
+			if (tSize < 1) throw new IllegalArgumentException("Zero or negative t-size for output image");
+			if (cSize < 1) throw new IllegalArgumentException("Zero or negative c-size for output image");
+			final Dimensions outSize = new Dimensions(xSize,ySize,zSize,tSize,cSize);
+			final Coordinates inPosition = new Coordinates(xPosition,yPosition,zPosition-1,tPosition-1,cPosition-1);
+			final Image output = embedder.run(input,outSize,inPosition,scheme);
+			TJ.show(output,image,mapChannels(input.dimensions(),outSize,inPosition,filling));
 			
 		} catch (OutOfMemoryError e) {
 			TJ.error("Not enough memory for this operation");
@@ -159,46 +173,46 @@ class TJEmbed {
 		}
 	}
 	
-	private int[][] mapchan(final Dimensions indims, final Dimensions newdims, final Coordinates inpos, final int filling) {
+	private int[][] mapChannels(final Dimensions inSize, final Dimensions outSize, final Coordinates inPosition, final int filling) {
 		
 		final int[][] idx = new int[2][];
 		
 		switch (filling) {
 			case 0: case 1: case 2:
-				idx[0] = new int[indims.c]; idx[1] = new int[indims.c];
-				for (int i=0; i<indims.c; ++i) { idx[0][i] = i + 1; idx[1][i] = inpos.c + i + 1; }
+				idx[0] = new int[inSize.c]; idx[1] = new int[inSize.c];
+				for (int i=0; i<inSize.c; ++i) { idx[0][i] = i + 1; idx[1][i] = inPosition.c + i + 1; }
 				break;
 			case 3:
-				idx[0] = new int[newdims.c]; idx[1] = new int[newdims.c];
-				for (int i=0; i<indims.c; ++i) idx[0][inpos.c+i] = i + 1;
-				for (int i=0; i<newdims.c; ++i) idx[1][i] = i + 1;
-				for (int i=inpos.c-1, i0=inpos.c+indims.c-1; i>=0; --i, --i0) idx[0][i] = idx[0][i0];
-				for (int i=inpos.c+indims.c, i0=inpos.c; i<newdims.c; ++i, ++i0) idx[0][i] = idx[0][i0];
+				idx[0] = new int[outSize.c]; idx[1] = new int[outSize.c];
+				for (int i=0; i<inSize.c; ++i) idx[0][inPosition.c+i] = i + 1;
+				for (int i=0; i<outSize.c; ++i) idx[1][i] = i + 1;
+				for (int i=inPosition.c-1, i0=inPosition.c+inSize.c-1; i>=0; --i, --i0) idx[0][i] = idx[0][i0];
+				for (int i=inPosition.c+inSize.c, i0=inPosition.c; i<outSize.c; ++i, ++i0) idx[0][i] = idx[0][i0];
 				break;
 			case 4:
-				idx[0] = new int[newdims.c]; idx[1] = new int[newdims.c];
-				for (int i=0; i<indims.c; ++i) idx[0][inpos.c+i] = i + 1;
-				for (int i=0; i<newdims.c; ++i) idx[1][i] = i + 1;
-				int ifs = 2; int indimssm1 = indims.c - 1;
-				if (indims.c == 1) { ++indimssm1; ifs = 1; }
-				for (int i=inpos.c-1; i>=0; --i) {
-				final int idiff = i - inpos.c;
+				idx[0] = new int[outSize.c]; idx[1] = new int[outSize.c];
+				for (int i=0; i<inSize.c; ++i) idx[0][inPosition.c+i] = i + 1;
+				for (int i=0; i<outSize.c; ++i) idx[1][i] = i + 1;
+				int ifs = 2; int indimssm1 = inSize.c - 1;
+				if (inSize.c == 1) { ++indimssm1; ifs = 1; }
+				for (int i=inPosition.c-1; i>=0; --i) {
+				final int idiff = i - inPosition.c;
 				int i0 = idiff / indimssm1; i0 += i0 % ifs;
-				idx[0][i] = idx[0][inpos.c + Math.abs(idiff - i0*indimssm1)]; }
-				for (int i=inpos.c+indims.c; i<newdims.c; ++i) {
-					final int idiff = i - inpos.c;
+				idx[0][i] = idx[0][inPosition.c + Math.abs(idiff - i0*indimssm1)]; }
+				for (int i=inPosition.c+inSize.c; i<outSize.c; ++i) {
+					final int idiff = i - inPosition.c;
 					int i0 = idiff / indimssm1; i0 += i0 % ifs;
-					idx[0][i] = idx[0][inpos.c + Math.abs(idiff - i0*indimssm1)];
+					idx[0][i] = idx[0][inPosition.c + Math.abs(idiff - i0*indimssm1)];
 				}
 				break;
 			case 5:
-				idx[0] = new int[newdims.c]; idx[1] = new int[newdims.c];
-				for (int i=0; i<indims.c; ++i) idx[0][inpos.c+i] = i + 1;
-				for (int i=0; i<newdims.c; ++i) idx[1][i] = i + 1;
-				final int b = idx[0][inpos.c];
-				final int e = idx[0][inpos.c + indims.c - 1];
-				for (int i=inpos.c-1; i>=0; --i) idx[0][i] = b;
-				for (int i=inpos.c+indims.c; i<newdims.c; ++i) idx[0][i] = e;
+				idx[0] = new int[outSize.c]; idx[1] = new int[outSize.c];
+				for (int i=0; i<inSize.c; ++i) idx[0][inPosition.c+i] = i + 1;
+				for (int i=0; i<outSize.c; ++i) idx[1][i] = i + 1;
+				final int b = idx[0][inPosition.c];
+				final int e = idx[0][inPosition.c + inSize.c - 1];
+				for (int i=inPosition.c-1; i>=0; --i) idx[0][i] = b;
+				for (int i=inPosition.c+inSize.c; i<outSize.c; ++i) idx[0][i] = e;
 				break;
 		}
 		

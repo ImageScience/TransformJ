@@ -20,12 +20,12 @@ public class TJ_Panel implements PlugIn, ActionListener, WindowListener {
 	
 	private Dialog dialog; Panel panel;
 	
-	private Button affine, crop, embed;
-	private Button matrix, mirror, rotate;
-	private Button scale, trans, turn;
-	private Button about, options, website;
+	private Button affineButton, cropButton, embedButton;
+	private Button matrixButton, mirrorButton, rotateButton;
+	private Button scaleButton, translateButton, turnButton;
+	private Button aboutButton, optionsButton, websiteButton;
 	
-	private static Point pos = new Point(-1,-1);
+	private static Point position = new Point(-1,-1);
 	
 	public void run(String arg) {
 		
@@ -41,26 +41,26 @@ public class TJ_Panel implements PlugIn, ActionListener, WindowListener {
 		panel = new Panel();
 		panel.setLayout(new GridLayout(4,3,5,5));
 		
-		affine = addButton("Affine");
-		crop = addButton("Crop");
-		embed = addButton("Embed");
+		affineButton = addButton("Affine");
+		cropButton = addButton("Crop");
+		embedButton = addButton("Embed");
 		
-		matrix = addButton("Matrix");
-		mirror = addButton("Mirror");
-		rotate = addButton("Rotate");
+		matrixButton = addButton("Matrix");
+		mirrorButton = addButton("Mirror");
+		rotateButton = addButton("Rotate");
 		
-		scale = addButton("Scale");
-		trans = addButton("Translate");
-		turn = addButton("Turn");
+		scaleButton = addButton("Scale");
+		translateButton = addButton("Translate");
+		turnButton = addButton("Turn");
 		
-		about = addButton("About");
-		options = addButton("Options");
-		website = addButton("Website");
+		aboutButton = addButton("About");
+		optionsButton = addButton("Options");
+		websiteButton = addButton("Website");
 		
 		dialog.add(panel);
 		dialog.pack();
-		if (pos.x < 0 || pos.y < 0) GUI.center(dialog);
-		else dialog.setLocation(pos);
+		if (position.x < 0 || position.y < 0) GUI.center(dialog);
+		else dialog.setLocation(position);
 		dialog.setVisible(true);
 	}
 	
@@ -75,26 +75,26 @@ public class TJ_Panel implements PlugIn, ActionListener, WindowListener {
 	public void actionPerformed(ActionEvent e) {
 		
 		final Object source = e.getSource();
-		if (source == affine) IJ.doCommand("TransformJ Affine");
-		else if (source == crop) IJ.doCommand("TransformJ Crop");
-		else if (source == embed) IJ.doCommand("TransformJ Embed");
-		else if (source == matrix) (new TJ_Matrix()).run("");
-		else if (source == mirror) IJ.doCommand("TransformJ Mirror");
-		else if (source == rotate) IJ.doCommand("TransformJ Rotate");
-		else if (source == scale) IJ.doCommand("TransformJ Scale");
-		else if (source == trans) IJ.doCommand("TransformJ Translate");
-		else if (source == turn) IJ.doCommand("TransformJ Turn");
-		else if (source == about) (new TJ_About()).run("");
-		else if (source == options) IJ.doCommand("TransformJ Options");
-		else if (source == website) (new TJ_Website()).run("");
+		if (source == affineButton) IJ.doCommand("TransformJ Affine");
+		else if (source == cropButton) IJ.doCommand("TransformJ Crop");
+		else if (source == embedButton) IJ.doCommand("TransformJ Embed");
+		else if (source == matrixButton) (new TJ_Matrix()).run("");
+		else if (source == mirrorButton) IJ.doCommand("TransformJ Mirror");
+		else if (source == rotateButton) IJ.doCommand("TransformJ Rotate");
+		else if (source == scaleButton) IJ.doCommand("TransformJ Scale");
+		else if (source == translateButton) IJ.doCommand("TransformJ Translate");
+		else if (source == turnButton) IJ.doCommand("TransformJ Turn");
+		else if (source == aboutButton) (new TJ_About()).run("");
+		else if (source == optionsButton) IJ.doCommand("TransformJ Options");
+		else if (source == websiteButton) (new TJ_Website()).run("");
 	}
 	
 	public void windowActivated(final WindowEvent e) { }
 	
 	public void windowClosed(final WindowEvent e) {
 		
-		pos.x = e.getWindow().getX();
-		pos.y = e.getWindow().getY();
+		position.x = e.getWindow().getX();
+		position.y = e.getWindow().getY();
 	}
 	
 	public void windowClosing(final WindowEvent e) {

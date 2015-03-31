@@ -16,71 +16,64 @@ import java.awt.event.WindowListener;
 
 public class TJ_Rotate implements PlugIn, WindowListener {
 	
-	private static String zangle = "0.0";
-	private static String yangle = "0.0";
-	private static String xangle = "0.0";
-	
-	private static final String[] schemes = {
-		"nearest neighbor",
-		"linear",
-		"cubic convolution",
-		"cubic B-spline",
-		"cubic O-MOMS",
-		"quintic B-spline"
-	};
-	private static int scheme = 1;
-	
-	private static String bgvalue = "0.0";
-	
+	private static String zAngle = "0.0";
+	private static String yAngle = "0.0";
+	private static String xAngle = "0.0";
+	private static int interpolation = 1;
+	private static String background = "0.0";
 	private static boolean adjust = true;
 	private static boolean antialias = false;
 	
-	private static Point pos = new Point(-1,-1);
+	private static Point position = new Point(-1,-1);
 	
 	public void run(String arg) {
 		
 		if (!TJ.check()) return;
-		final ImagePlus imp = TJ.imageplus();
-		if (imp == null) return;
+		final ImagePlus image = TJ.imageplus();
+		if (image == null) return;
 		
 		TJ.log(TJ.name()+" "+TJ.version()+": Rotate");
 		
+		TJ.options();
+		
 		GenericDialog gd = new GenericDialog(TJ.name()+": Rotate");
-		gd.addStringField("z-angle (degrees):",zangle);
-		gd.addStringField("y-angle (degrees):",yangle);
-		gd.addStringField("x-angle (degrees):",xangle);
-		gd.addPanel(new Panel(),GridBagConstraints.WEST,new Insets(0,0,0,0));
-		gd.addChoice("Interpolation scheme:",schemes,schemes[scheme]);
-		gd.addStringField("Background value:",bgvalue);
+		gd.setInsets(0,0,0);
+		gd.addMessage("Rotation angles in degrees:");
+		gd.addStringField("z-Angle:",zAngle);
+		gd.addStringField("y-Angle:",yAngle);
+		gd.addStringField("x-Angle:",xAngle);
+		gd.setInsets(15,0,5);
+		gd.addChoice("Interpolation:",TJ.interpolations,TJ.interpolations[interpolation]);
+		gd.addStringField("Background:",background);
 		gd.addCheckbox(" Adjust size to fit result",adjust);
 		gd.addCheckbox(" Anti-alias borders",antialias);
 		
-		if (pos.x >= 0 && pos.y >= 0) {
+		if (position.x >= 0 && position.y >= 0) {
 			gd.centerDialog(false);
-			gd.setLocation(pos);
+			gd.setLocation(position);
 		} else gd.centerDialog(true);
 		gd.addWindowListener(this);
 		gd.showDialog();
 		
 		if (gd.wasCanceled()) return;
 		
-		zangle = gd.getNextString();
-		yangle = gd.getNextString();
-		xangle = gd.getNextString();
-		scheme = gd.getNextChoiceIndex();
-		bgvalue = gd.getNextString();
+		zAngle = gd.getNextString();
+		yAngle = gd.getNextString();
+		xAngle = gd.getNextString();
+		interpolation = gd.getNextChoiceIndex();
+		background = gd.getNextString();
 		adjust = gd.getNextBoolean();
 		antialias = gd.getNextBoolean();
 		
-		(new TJRotate()).run(imp,zangle,yangle,xangle,scheme,bgvalue,adjust,antialias);
+		(new TJRotate()).run(image,zAngle,yAngle,xAngle,interpolation,background,adjust,antialias);
 	}
 	
 	public void windowActivated(final WindowEvent e) { }
 	
 	public void windowClosed(final WindowEvent e) {
 		
-		pos.x = e.getWindow().getX();
-		pos.y = e.getWindow().getY();
+		position.x = e.getWindow().getX();
+		position.y = e.getWindow().getY();
 	}
 	
 	public void windowClosing(final WindowEvent e) { }
@@ -98,43 +91,43 @@ public class TJ_Rotate implements PlugIn, WindowListener {
 class TJRotate {
 	
 	void run(
-		final ImagePlus imp,
-		final String zangle,
-		final String yangle,
-		final String xangle,
-		final int scheme,
-		final String bgvalue,
+		final ImagePlus image,
+		final String zAngle,
+		final String yAngle,
+		final String xAngle,
+		final int interpolation,
+		final String background,
 		final boolean adjust,
 		final boolean antialias
 	) {
 		
 		try {
-			final Image img = Image.wrap(imp);
+			final Image input = Image.wrap(image);
 			final Rotate rotator = new Rotate();
 			rotator.messenger.log(TJ_Options.log);
-			rotator.messenger.status(TJ_Options.pgs);
-			rotator.progressor.display(TJ_Options.pgs);
+			rotator.messenger.status(TJ_Options.progress);
+			rotator.progressor.display(TJ_Options.progress);
 			double za, ya, xa, bg;
-			try { za = Double.parseDouble(zangle); }
+			try { za = Double.parseDouble(zAngle); }
 			catch (Exception e) { throw new IllegalArgumentException("Invalid z-angle for rotation"); }
-			try { ya = Double.parseDouble(yangle); }
+			try { ya = Double.parseDouble(yAngle); }
 			catch (Exception e) { throw new IllegalArgumentException("Invalid y-angle for rotation"); }
-			try { xa = Double.parseDouble(xangle); }
+			try { xa = Double.parseDouble(xAngle); }
 			catch (Exception e) { throw new IllegalArgumentException("Invalid x-angle for rotation"); }
-			try { bg = Double.parseDouble(bgvalue); }
+			try { bg = Double.parseDouble(background); }
 			catch (Exception e) { throw new IllegalArgumentException("Invalid background value"); }
 			rotator.background = bg;
-			int ischeme = Rotate.NEAREST;
-			switch (scheme) {
-				case 0: ischeme = Rotate.NEAREST; break;
-				case 1: ischeme = Rotate.LINEAR; break;
-				case 2: ischeme = Rotate.CUBIC; break;
-				case 3: ischeme = Rotate.BSPLINE3; break;
-				case 4: ischeme = Rotate.OMOMS3; break;
-				case 5: ischeme = Rotate.BSPLINE5; break;
+			int scheme = Rotate.NEAREST;
+			switch (interpolation) {
+				case 0: scheme = Rotate.NEAREST; break;
+				case 1: scheme = Rotate.LINEAR; break;
+				case 2: scheme = Rotate.CUBIC; break;
+				case 3: scheme = Rotate.BSPLINE3; break;
+				case 4: scheme = Rotate.OMOMS3; break;
+				case 5: scheme = Rotate.BSPLINE5; break;
 			}
-			final Image newimg = rotator.run(img,za,ya,xa,ischeme,adjust,antialias);
-			TJ.show(newimg,imp);
+			final Image output = rotator.run(input,za,ya,xa,scheme,adjust,antialias);
+			TJ.show(output,image);
 			
 		} catch (OutOfMemoryError e) {
 			TJ.error("Not enough memory for this operation");

@@ -26,34 +26,25 @@ import java.io.File;
 public class TJ_Affine implements PlugIn, ActionListener, WindowListener {
 	
 	private static String file = "";
-	
-	private static final String[] schemes = {
-		"nearest neighbor",
-		"linear",
-		"cubic convolution",
-		"cubic B-spline",
-		"cubic O-MOMS",
-		"quintic B-spline"
-	};
-	private static int scheme = 1;
-	
-	private static String bgvalue = "0.0";
-	
+	private static int interpolation = 1;
+	private static String background = "0.0";
 	private static boolean adjust = true;
 	private static boolean antialias = false;
 	
 	private Button browseButton, createButton;
 	private TextField fileField;
 	
-	private static Point pos = new Point(-1,-1);
+	private static Point position = new Point(-1,-1);
 	
 	public void run(String arg) {
 		
 		if (!TJ.check()) return;
-		final ImagePlus imp = TJ.imageplus();
-		if (imp == null) return;
+		final ImagePlus image = TJ.imageplus();
+		if (image == null) return;
 		
 		TJ.log(TJ.name()+" "+TJ.version()+": Affine");
+		
+		TJ.options();
 		
 		GenericDialog gd = new GenericDialog(TJ.name()+": Affine");
 		gd.addStringField("Matrix file:",file,30);
@@ -79,15 +70,15 @@ public class TJ_Affine implements PlugIn, ActionListener, WindowListener {
 		bgbc = bgbl.getConstraints(buttons); bgbc.gridx = 1;
 		bgbl.setConstraints(buttons,bgbc);
 		
-		gd.addChoice("Interpolation scheme:",schemes,schemes[scheme]);
-		gd.addStringField("Background value:",bgvalue);
+		gd.addChoice("Interpolation:",TJ.interpolations,TJ.interpolations[interpolation]);
+		gd.addStringField("Background:",background);
 		
 		gd.addCheckbox(" Adjust size to fit result",adjust);
 		gd.addCheckbox(" Anti-alias borders",antialias);
 		
-		if (pos.x >= 0 && pos.y >= 0) {
+		if (position.x >= 0 && position.y >= 0) {
 			gd.centerDialog(false);
-			gd.setLocation(pos);
+			gd.setLocation(position);
 		} else gd.centerDialog(true);
 		gd.addWindowListener(this);
 		gd.showDialog();
@@ -95,12 +86,12 @@ public class TJ_Affine implements PlugIn, ActionListener, WindowListener {
 		if (gd.wasCanceled()) return;
 		
 		file = gd.getNextString();
-		scheme = gd.getNextChoiceIndex();
-		bgvalue = gd.getNextString();
+		interpolation = gd.getNextChoiceIndex();
+		background = gd.getNextString();
 		adjust = gd.getNextBoolean();
 		antialias = gd.getNextBoolean();
 		
-		(new TJAffine()).run(imp,file,scheme,bgvalue,adjust,antialias);
+		(new TJAffine()).run(image,file,interpolation,background,adjust,antialias);
 	}
 	
 	public void actionPerformed(final ActionEvent e) {
@@ -118,11 +109,11 @@ public class TJ_Affine implements PlugIn, ActionListener, WindowListener {
 				fileField.setText(path);
 			}
 		} else if (e.getSource() == createButton) {
-			final TJ_Matrix tjm = new TJ_Matrix();
-			try { tjm.load(fileField.getText()); }
+			final TJ_Matrix matrix = new TJ_Matrix();
+			try { matrix.load(fileField.getText()); }
 			catch (Throwable x) { }
-			tjm.run("");
-			final String path = tjm.saved();
+			matrix.run("");
+			final String path = matrix.saved();
 			if (path != null) fileField.setText(path);
 		}
 	}
@@ -131,8 +122,8 @@ public class TJ_Affine implements PlugIn, ActionListener, WindowListener {
 	
 	public void windowClosed(final WindowEvent e) {
 		
-		pos.x = e.getWindow().getX();
-		pos.y = e.getWindow().getY();
+		position.x = e.getWindow().getX();
+		position.y = e.getWindow().getY();
 	}
 	
 	public void windowClosing(final WindowEvent e) { }
@@ -150,10 +141,10 @@ public class TJ_Affine implements PlugIn, ActionListener, WindowListener {
 class TJAffine {
 	
 	void run(
-		final ImagePlus imp,
+		final ImagePlus image,
 		final String file,
-		final int scheme,
-		final String bgvalue,
+		final int interpolation,
+		final String background,
 		final boolean adjust,
 		final boolean antialias
 	) {
@@ -161,29 +152,29 @@ class TJAffine {
 		try {
 			if (file == null || file.equals(""))
 				throw new IllegalArgumentException("Empty matrix file name");
-			final TJ_Matrix tjm = new TJ_Matrix();
-			tjm.load(file);
-			final Transform tfm = tjm.get();
-			final Image img = Image.wrap(imp);
+			final TJ_Matrix matrix = new TJ_Matrix();
+			matrix.load(file);
+			final Transform transform = matrix.get();
+			final Image input = Image.wrap(image);
 			final Affine affiner = new Affine();
 			affiner.messenger.log(TJ_Options.log);
-			affiner.messenger.status(TJ_Options.pgs);
-			affiner.progressor.display(TJ_Options.pgs);
+			affiner.messenger.status(TJ_Options.progress);
+			affiner.progressor.display(TJ_Options.progress);
 			double bg;
-			try { bg = Double.parseDouble(bgvalue); }
+			try { bg = Double.parseDouble(background); }
 			catch (Exception e) { throw new IllegalArgumentException("Invalid background value"); }
 			affiner.background = bg;
-			int ischeme = Affine.NEAREST;
-			switch (scheme) {
-				case 0: ischeme = Affine.NEAREST; break;
-				case 1: ischeme = Affine.LINEAR; break;
-				case 2: ischeme = Affine.CUBIC; break;
-				case 3: ischeme = Affine.BSPLINE3; break;
-				case 4: ischeme = Affine.OMOMS3; break;
-				case 5: ischeme = Affine.BSPLINE5; break;
+			int scheme = Affine.NEAREST;
+			switch (interpolation) {
+				case 0: scheme = Affine.NEAREST; break;
+				case 1: scheme = Affine.LINEAR; break;
+				case 2: scheme = Affine.CUBIC; break;
+				case 3: scheme = Affine.BSPLINE3; break;
+				case 4: scheme = Affine.OMOMS3; break;
+				case 5: scheme = Affine.BSPLINE5; break;
 			}
-			final Image newimg = affiner.run(img,tfm,ischeme,adjust,antialias);
-			TJ.show(newimg,imp);
+			final Image output = affiner.run(input,transform,scheme,adjust,antialias);
+			TJ.show(output,image);
 			
 		} catch (OutOfMemoryError e) {
 			TJ.error("Not enough memory for this operation");

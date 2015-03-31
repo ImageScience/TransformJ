@@ -3,6 +3,7 @@ package transformj;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Macro;
 import ij.WindowManager;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
@@ -30,7 +31,7 @@ public final class TJ {
 		return (version == null) ? "DEV" : version;
 	}
 	
-	private static final String MINIMUM_IMAGEJ_VERSION = "1.44a";
+	private static final String MINIMUM_IMAGEJ_VERSION = "1.49a";
 		
 	private static final String MINIMUM_IMAGESCIENCE_VERSION = "2.4.0";
 	
@@ -231,6 +232,47 @@ public final class TJ {
 	static void status(final String message) {
 		
 		IJ.showStatus(message);
+	}
+	
+	static final String[] interpolations = {
+		"Nearest Neighbor",
+		"Linear",
+		"Cubic Convolution",
+		"Cubic B-Spline",
+		"Cubic O-MOMS",
+		"Quintic B-Spline"
+	};
+	
+	static final String[] fillings = {
+		"Zero",
+		"Minimum",
+		"Maximum",
+		"Repeat",
+		"Mirror",
+		"Clamp"
+	};
+	
+	static void options() {
+		
+		// Ensure backward compatibility with previous versions:
+		String options = Macro.getOptions();
+		if (options == null || options.isEmpty()) return;
+		
+		options = options.replaceAll("nearest neighbor",interpolations[0]);
+		options = options.replaceAll("linear",interpolations[1]);
+		options = options.replaceAll("cubic convolution",interpolations[2]);
+		options = options.replaceAll("cubic B-spline",interpolations[3]);
+		options = options.replaceAll("cubic O-MOMS",interpolations[4]);
+		options = options.replaceAll("quintic B-spline",interpolations[5]);
+		
+		options = options.replaceAll("zero",fillings[0]);
+		options = options.replaceAll("minimum",fillings[1]);
+		options = options.replaceAll("maximum",fillings[2]);
+		options = options.replaceAll("repeat",fillings[3]);
+		options = options.replaceAll("mirror",fillings[4]);
+		options = options.replaceAll("clamp",fillings[5]);
+		
+		Macro.setOptions(options);
 	}
 	
 }

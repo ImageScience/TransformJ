@@ -16,64 +16,58 @@ import java.awt.event.WindowListener;
 
 public class TJ_Translate implements PlugIn, WindowListener {
 	
-	private static String xtrans = "0.0";
-	private static String ytrans = "0.0";
-	private static String ztrans = "0.0";
+	private static String xShift = "0.0";
+	private static String yShift = "0.0";
+	private static String zShift = "0.0";
+	private static int interpolation = 1;
+	private static String background = "0.0";
 	
-	private static final String[] schemes = {
-		"nearest neighbor",
-		"linear",
-		"cubic convolution",
-		"cubic B-spline",
-		"cubic O-MOMS",
-		"quintic B-spline"
-	};
-	private static int scheme = 1;
-	
-	private static String bgvalue = "0.0";
-	
-	private static Point pos = new Point(-1,-1);
+	private static Point position = new Point(-1,-1);
 	
 	public void run(String arg) {
 		
 		if (!TJ.check()) return;
-		final ImagePlus imp = TJ.imageplus();
-		if (imp == null) return;
+		final ImagePlus image = TJ.imageplus();
+		if (image == null) return;
 		
 		TJ.log(TJ.name()+" "+TJ.version()+": Translate");
 		
-		GenericDialog gd = new GenericDialog(TJ.name()+": Translate");
-		gd.addStringField("x-translation (pixels):",xtrans);
-		gd.addStringField("y-translation (pixels):",ytrans);
-		gd.addStringField("z-translation (slices):",ztrans);
-		gd.addPanel(new Panel(),GridBagConstraints.WEST,new Insets(0,0,0,0));
-		gd.addChoice("Interpolation scheme:",schemes,schemes[scheme]);
-		gd.addStringField("Background value:",bgvalue);
+		TJ.options();
 		
-		if (pos.x >= 0 && pos.y >= 0) {
+		GenericDialog gd = new GenericDialog(TJ.name()+": Translate");
+		gd.setInsets(0,0,0);
+		gd.addMessage("Translation in voxels:");
+		gd.addStringField("x-Translation:",xShift);
+		gd.addStringField("y-Translation:",yShift);
+		gd.addStringField("z-Translation:",zShift);
+		gd.setInsets(15,0,5);
+		gd.addChoice("Interpolation:",TJ.interpolations,TJ.interpolations[interpolation]);
+		gd.addStringField("Background:",background);
+		
+		if (position.x >= 0 && position.y >= 0) {
 			gd.centerDialog(false);
-			gd.setLocation(pos);
+			gd.setLocation(position);
 		} else gd.centerDialog(true);
 		gd.addWindowListener(this);
 		gd.showDialog();
 		
 		if (gd.wasCanceled()) return;
 		
-		xtrans = gd.getNextString();
-		ytrans = gd.getNextString();
-		ztrans = gd.getNextString();
-		scheme = gd.getNextChoiceIndex();
-		bgvalue = gd.getNextString();
+		xShift = gd.getNextString();
+		yShift = gd.getNextString();
+		zShift = gd.getNextString();
+		interpolation = gd.getNextChoiceIndex();
+		background = gd.getNextString();
 		
-		(new TJTranslate()).run(imp,xtrans,ytrans,ztrans,scheme,bgvalue);
+		(new TJTranslate()).run(image,xShift,yShift,zShift,interpolation,background);
 	}
 	
 	public void windowActivated(final WindowEvent e) { }
 	
 	public void windowClosed(final WindowEvent e) {
 		
-		pos.x = e.getWindow().getX();
-		pos.y = e.getWindow().getY();
+		position.x = e.getWindow().getX();
+		position.y = e.getWindow().getY();
 	}
 	
 	public void windowClosing(final WindowEvent e) { }
@@ -91,41 +85,41 @@ public class TJ_Translate implements PlugIn, WindowListener {
 class TJTranslate {
 	
 	void run(
-		final ImagePlus imp,
-		final String xtrans,
-		final String ytrans,
-		final String ztrans,
-		final int scheme,
-		final String bgvalue
+		final ImagePlus image,
+		final String xShift,
+		final String yShift,
+		final String zShift,
+		final int interpolation,
+		final String background
 	) {
 		
 		try {
-			final Image img = Image.wrap(imp);
+			final Image input = Image.wrap(image);
 			final Translate translator = new Translate();
 			translator.messenger.log(TJ_Options.log);
-			translator.messenger.status(TJ_Options.pgs);
-			translator.progressor.display(TJ_Options.pgs);
+			translator.messenger.status(TJ_Options.progress);
+			translator.progressor.display(TJ_Options.progress);
 			double xs, ys, zs, bg;
-			try { xs = Double.parseDouble(xtrans); }
+			try { xs = Double.parseDouble(xShift); }
 			catch (Exception e) { throw new IllegalArgumentException("Invalid x-translation value"); }
-			try { ys = Double.parseDouble(ytrans); }
+			try { ys = Double.parseDouble(yShift); }
 			catch (Exception e) { throw new IllegalArgumentException("Invalid y-translation value"); }
-			try { zs = Double.parseDouble(ztrans); }
+			try { zs = Double.parseDouble(zShift); }
 			catch (Exception e) { throw new IllegalArgumentException("Invalid z-translation value"); }
-			try { bg = Double.parseDouble(bgvalue); }
+			try { bg = Double.parseDouble(background); }
 			catch (Exception e) { throw new IllegalArgumentException("Invalid background value"); }
 			translator.background = bg;
-			int ischeme = Translate.NEAREST;
-			switch (scheme) {
-				case 0: ischeme = Translate.NEAREST; break;
-				case 1: ischeme = Translate.LINEAR; break;
-				case 2: ischeme = Translate.CUBIC; break;
-				case 3: ischeme = Translate.BSPLINE3; break;
-				case 4: ischeme = Translate.OMOMS3; break;
-				case 5: ischeme = Translate.BSPLINE5; break;
+			int scheme = Translate.NEAREST;
+			switch (interpolation) {
+				case 0: scheme = Translate.NEAREST; break;
+				case 1: scheme = Translate.LINEAR; break;
+				case 2: scheme = Translate.CUBIC; break;
+				case 3: scheme = Translate.BSPLINE3; break;
+				case 4: scheme = Translate.OMOMS3; break;
+				case 5: scheme = Translate.BSPLINE5; break;
 			}
-			final Image newimg = translator.run(img,xs,ys,zs,ischeme);
-			TJ.show(newimg,imp);
+			final Image output = translator.run(input,xs,ys,zs,scheme);
+			TJ.show(output,image);
 			
 		} catch (OutOfMemoryError e) {
 			TJ.error("Not enough memory for this operation");

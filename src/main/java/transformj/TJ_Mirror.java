@@ -23,55 +23,54 @@ public class TJ_Mirror implements PlugIn, WindowListener {
 	private static boolean t = false;
 	private static boolean c = false;
 	
-	private static Point pos = new Point(-1,-1);
+	private static Point position = new Point(-1,-1);
 	
 	public void run(String arg) {
 		
 		if (!TJ.check()) return;
-		final ImagePlus imp = TJ.imageplus();
-		if (imp == null) return;
+		final ImagePlus image = TJ.imageplus();
+		if (image == null) return;
 		
 		TJ.log(TJ.name()+" "+TJ.version()+": Mirror");
 		
-		boolean dox = true; if (imp.getWidth() == 1) dox = false;
-		boolean doy = true; if (imp.getHeight() == 1) doy = false;
-		boolean doz = true; if (imp.getNSlices() == 1) doz = false;
-		boolean dot = true; if (imp.getNFrames() == 1) dot = false;
-		boolean doc = true; if (imp.getNChannels() == 1) doc = false;
+		boolean xDo = true; if (image.getWidth() == 1) xDo = false;
+		boolean yDo = true; if (image.getHeight() == 1) yDo = false;
+		boolean zDo = true; if (image.getNSlices() == 1) zDo = false;
+		boolean tDo = true; if (image.getNFrames() == 1) tDo = false;
+		boolean cDo = true; if (image.getNChannels() == 1) cDo = false;
 		
-		final String space = "     ";
 		GenericDialog gd = new GenericDialog(TJ.name()+": Mirror");
-		if (dox) gd.addCheckbox(" x-mirror input image"+space,x);
-		if (doy) gd.addCheckbox(" y-mirror input image"+space,y);
-		if (doz) gd.addCheckbox(" z-mirror input image"+space,z);
-		if (dot) gd.addCheckbox(" t-mirror input image"+space,t);
-		if (doc) gd.addCheckbox(" c-mirror input image"+space,c);
+		if (xDo) gd.addCheckbox(" x-Mirror",x);
+		if (yDo) gd.addCheckbox(" y-Mirror",y);
+		if (zDo) gd.addCheckbox(" z-Mirror",z);
+		if (tDo) gd.addCheckbox(" t-Mirror",t);
+		if (cDo) gd.addCheckbox(" c-Mirror",c);
 		gd.addPanel(new Panel(),GridBagConstraints.EAST,new Insets(0,0,0,0));
 		
-		if (pos.x >= 0 && pos.y >= 0) {
+		if (position.x >= 0 && position.y >= 0) {
 			gd.centerDialog(false);
-			gd.setLocation(pos);
+			gd.setLocation(position);
 		} else gd.centerDialog(true);
 		gd.addWindowListener(this);
 		gd.showDialog();
 		
 		if (gd.wasCanceled()) return;
 		
-		x = dox ? gd.getNextBoolean() : false;
-		y = doy ? gd.getNextBoolean() : false;
-		z = doz ? gd.getNextBoolean() : false;
-		t = dot ? gd.getNextBoolean() : false;
-		c = doc ? gd.getNextBoolean() : false;
+		x = xDo ? gd.getNextBoolean() : false;
+		y = yDo ? gd.getNextBoolean() : false;
+		z = zDo ? gd.getNextBoolean() : false;
+		t = tDo ? gd.getNextBoolean() : false;
+		c = cDo ? gd.getNextBoolean() : false;
 		
-		(new TJMirror()).run(imp,x,y,z,t,c);
+		(new TJMirror()).run(image,x,y,z,t,c);
 	}
 	
 	public void windowActivated(final WindowEvent e) { }
 	
 	public void windowClosed(final WindowEvent e) {
 		
-		pos.x = e.getWindow().getX();
-		pos.y = e.getWindow().getY();
+		position.x = e.getWindow().getX();
+		position.y = e.getWindow().getY();
 	}
 	
 	public void windowClosing(final WindowEvent e) { }
@@ -89,7 +88,7 @@ public class TJ_Mirror implements PlugIn, WindowListener {
 class TJMirror {
 	
 	void run(
-		final ImagePlus imp,
+		final ImagePlus image,
 		final boolean x,
 		final boolean y,
 		final boolean z,
@@ -98,14 +97,14 @@ class TJMirror {
 	) {
 		
 		try {
-			final Image img = Image.wrap(imp);
-			final Image newimg = img.duplicate();
-			final Mirror mrr = new Mirror();
-			mrr.messenger.log(TJ_Options.log);
-			mrr.messenger.status(TJ_Options.pgs);
-			mrr.progressor.display(TJ_Options.pgs);
-			mrr.run(newimg,new Axes(x,y,z,t,c));
-			TJ.show(newimg,imp,mapchan(c,imp.getNChannels()));
+			final Image input = Image.wrap(image);
+			final Image output = input.duplicate();
+			final Mirror mirror = new Mirror();
+			mirror.messenger.log(TJ_Options.log);
+			mirror.messenger.status(TJ_Options.progress);
+			mirror.progressor.display(TJ_Options.progress);
+			mirror.run(output,new Axes(x,y,z,t,c));
+			TJ.show(output,image,mapChannels(c,image.getNChannels()));
 			
 		} catch (OutOfMemoryError e) {
 			TJ.error("Not enough memory for this operation");
@@ -116,7 +115,7 @@ class TJMirror {
 		}
 	}
 	
-	private int[][] mapchan(final boolean c, final int nc) {
+	private int[][] mapChannels(final boolean c, final int nc) {
 		
 		final int[][] idx = new int[2][nc];
 		if (c) for (int i=0; i<nc; ++i) {

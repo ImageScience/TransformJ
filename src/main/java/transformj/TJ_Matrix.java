@@ -27,6 +27,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedReader;
@@ -38,38 +40,38 @@ import java.io.FileWriter;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusListener, WindowListener {
+public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusListener, KeyListener, WindowListener {
 	
 	private Dialog dialog; Panel panel;
-	private TextField[][] tfs;
+	private TextField[][] textFields;
 	
-	private Button rotate, scale, shear, trans;
-	private Button invert, reset, copy, print;
-	private Button undo, load, save, close;
+	private Button rotateButton, scaleButton, shearButton, translateButton;
+	private Button invertButton, resetButton, copyButton, printButton;
+	private Button undoButton, loadButton, saveButton, closeButton;
 	
-	private Transform tpr = null;
-	private static final Transform tfm = new Transform();
-	private final Formatter fmt = new Formatter();
+	private Transform previousTransform = null;
+	private static final Transform transform = new Transform();
+	private final Formatter formatter = new Formatter();
 	private String saved = null;
 	
-	private static final Point pos = new Point(-1,-1);
-	private static final Point rpos = new Point(-1,-1);
-	private static final Point spos = new Point(-1,-1);
-	private static final Point tpos = new Point(-1,-1);
-	private static final Point hpos = new Point(-1,-1);
+	private static final Point position = new Point(-1,-1);
+	private static final Point rotatePosition = new Point(-1,-1);
+	private static final Point scalePosition = new Point(-1,-1);
+	private static final Point translatePosition = new Point(-1,-1);
+	private static final Point shearPosition = new Point(-1,-1);
 	
-	private static String rangle = "0.0";
-	private static String sfactor = "1.0";
-	private static String tdistance = "0.0";
-	private static String hfactor = "1.0";
+	private static String rotationAngle = "0.0";
+	private static String scalingFactor = "1.0";
+	private static String translationDistance = "0.0";
+	private static String shearingFactor = "1.0";
 	
 	private static final String[] axes = { "x", "y", "z" };
 	
-	private static int raxis = 0;
-	private static int saxis = 0;
-	private static int taxis = 0;
-	private static int haxis = 0;
-	private static int daxis = 0;
+	private static int rotationAxis = 0;
+	private static int scalingAxis = 0;
+	private static int translationAxis = 0;
+	private static int shearingAxis = 0;
+	private static int drivingAxis = 0;
 	
 	public void run(String arg) {
 		
@@ -85,51 +87,53 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 		panel = new Panel();
 		panel.setLayout(new GridLayout(7,4,5,5));
 		
-		tfs = new TextField[4][4];
+		textFields = new TextField[4][4];
 		for (int r=0; r<4; ++r) {
 			for (int c=0; c<4; ++c) {
-				tfs[r][c] = addField();
-				if (r == 3) tfs[r][c].setEditable(false);
+				textFields[r][c] = addField();
+				if (r == 3) textFields[r][c].setEditable(false);
 			}
 		}
 		
-		rotate = addButton("Rotate");
-		scale = addButton("Scale");
-		shear = addButton("Shear");
-		trans = addButton("Translate");
+		rotateButton = addButton("Rotate");
+		scaleButton = addButton("Scale");
+		shearButton = addButton("Shear");
+		translateButton = addButton("Translate");
 		
-		invert = addButton("Invert");
-		reset = addButton("Reset");
-		copy = addButton("Copy");
-		print = addButton("Print");
+		invertButton = addButton("Invert");
+		resetButton = addButton("Reset");
+		copyButton = addButton("Copy");
+		printButton = addButton("Print");
 		
-		undo = addButton("Undo");
-		load = addButton("Load");
-		save = addButton("Save");
-		close = addButton("Close");
+		undoButton = addButton("Undo");
+		loadButton = addButton("Load");
+		saveButton = addButton("Save");
+		closeButton = addButton("Close");
 		
-		fmt.decs(10);
-		fmt.chop(1E-10);
+		formatter.decs(10);
+		formatter.chop(1E-10);
 		refresh();
 		dialog.add(panel);
 		dialog.pack();
-		if (pos.x < 0 || pos.y < 0) GUI.center(dialog);
-		else dialog.setLocation(pos);
+		if (position.x < 0 || position.y < 0) GUI.center(dialog);
+		else dialog.setLocation(position);
 		dialog.setVisible(true);
 	}
 	
 	private Button addButton(String label) {
 		
-		final Button bt = new Button("   "+label+"   ");
-		bt.addActionListener(this);
-		panel.add(bt);
-		return bt;
+		final Button b = new Button("   "+label+"   ");
+		b.addActionListener(this);
+		b.addKeyListener(this);
+		panel.add(b);
+		return b;
 	}
 	
 	private TextField addField() {
 		
 		final TextField tf = new TextField(10);
 		tf.addFocusListener(this);
+		tf.addKeyListener(this);
 		tf.setEditable(true);
 		panel.add(tf);
 		return tf;
@@ -139,7 +143,7 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 		
 		for (int r=0; r<4; ++r) {
 			for (int c=0; c<4; ++c) {
-				tfs[r][c].setText(fmt.d2s(tfm.get(r,c)));
+				textFields[r][c].setText(formatter.d2s(transform.get(r,c)));
 			}
 		}
 	}
@@ -151,7 +155,7 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 		for (int r=0; r<4; ++r) {
 			sb.append(prefix);
 			for (int c=0; c<4; ++c) {
-				sb.append(fmt.d2s(tfm.get(r,c)));
+				sb.append(formatter.d2s(transform.get(r,c)));
 				if (c < 3) sb.append(delim);
 			}
 			sb.append(postfix);
@@ -179,12 +183,12 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 	
 	public Transform get() {
 		
-		return tfm.duplicate();
+		return transform.duplicate();
 	}
 	
 	public void set(final Transform a) {
 		
-		tfm.set(a);
+		transform.set(a);
 	}
 	
 	public void load(final String file) {
@@ -231,7 +235,7 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 		}
 		
 		// Store matrix:
-		tfm.set(matrix);
+		transform.set(matrix);
 	}
 	
 	public void save(final String file) {
@@ -253,139 +257,142 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 	
 	public void actionPerformed(ActionEvent e) {
 		
-		final Object source = e.getSource();
+		doButton(e.getSource());
+	}
+	
+	private void doButton(final Object source) {
 		
-		if (source == rotate) {
+		if (source == rotateButton) {
 			final GenericDialog gd = new GenericDialog(TJ.name()+": Rotate");
-			gd.addStringField("Rotation angle (degrees):",rangle);
-			gd.addChoice("Rotation axis:",axes,axes[raxis]);
-			if (rpos.x >= 0 && rpos.y >= 0) {
+			gd.addStringField("Rotation angle:",rotationAngle);
+			gd.addChoice("Rotation axis:",axes,axes[rotationAxis]);
+			if (rotatePosition.x >= 0 && rotatePosition.y >= 0) {
 				gd.centerDialog(false);
-				gd.setLocation(rpos);
+				gd.setLocation(rotatePosition);
 			} else gd.centerDialog(true);
 			gd.showDialog();
-			gd.getLocation(rpos);
+			gd.getLocation(rotatePosition);
 			if (!gd.wasCanceled()) {
-				rangle = gd.getNextString();
-				raxis = gd.getNextChoiceIndex();
+				rotationAngle = gd.getNextString();
+				rotationAxis = gd.getNextChoiceIndex();
 				try {
 					int axis = Axes.X;
-					if (raxis == 1) axis = Axes.Y;
-					else if (raxis == 2) axis = Axes.Z;
-					double angle = Double.parseDouble(rangle);
-					tpr = tfm.duplicate();
-					tfm.rotate(angle,axis);
+					if (rotationAxis == 1) axis = Axes.Y;
+					else if (rotationAxis == 2) axis = Axes.Z;
+					double angle = Double.parseDouble(rotationAngle);
+					previousTransform = transform.duplicate();
+					transform.rotate(angle,axis);
 					refresh();
-					TJ.log("Rotated the matrix "+rangle+" degrees around "+axes[raxis]);
+					TJ.log("Rotated the matrix "+rotationAngle+" degrees around "+axes[rotationAxis]);
 				} catch (Exception x) {
 					TJ.error("Invalid rotation angle");
 				}
 			}
 			
-		} else if (source == scale) {
+		} else if (source == scaleButton) {
 			final GenericDialog gd = new GenericDialog(TJ.name()+": Scale");
-			gd.addStringField("Scaling factor:",sfactor);
-			gd.addChoice("Scaling axis:",axes,axes[saxis]);
-			if (spos.x >= 0 && spos.y >= 0) {
+			gd.addStringField("Scaling factor:",scalingFactor);
+			gd.addChoice("Scaling axis:",axes,axes[scalingAxis]);
+			if (scalePosition.x >= 0 && scalePosition.y >= 0) {
 				gd.centerDialog(false);
-				gd.setLocation(spos);
+				gd.setLocation(scalePosition);
 			} else gd.centerDialog(true);
 			gd.showDialog();
-			gd.getLocation(spos);
+			gd.getLocation(scalePosition);
 			if (!gd.wasCanceled()) {
-				sfactor = gd.getNextString();
-				saxis = gd.getNextChoiceIndex();
+				scalingFactor = gd.getNextString();
+				scalingAxis = gd.getNextChoiceIndex();
 				try {
 					int axis = Axes.X;
-					if (saxis == 1) axis = Axes.Y;
-					else if (saxis == 2) axis = Axes.Z;
-					double factor = Double.parseDouble(sfactor);
-					tpr = tfm.duplicate();
-					tfm.scale(factor,axis);
+					if (scalingAxis == 1) axis = Axes.Y;
+					else if (scalingAxis == 2) axis = Axes.Z;
+					double factor = Double.parseDouble(scalingFactor);
+					previousTransform = transform.duplicate();
+					transform.scale(factor,axis);
 					refresh();
-					TJ.log("Scaled the matrix by a factor of "+sfactor+" in "+axes[saxis]);
+					TJ.log("Scaled the matrix by a factor of "+scalingFactor+" in "+axes[scalingAxis]);
 				} catch (Exception x) {
 					TJ.error("Invalid scaling factor");
 				}
 			}
 			
-		} else if (source == shear) {
+		} else if (source == shearButton) {
 			final GenericDialog gd = new GenericDialog(TJ.name()+": Shearing");
-			gd.addStringField("Shearing factor:",hfactor);
-			gd.addChoice("Shearing axis:",axes,axes[haxis]);
-			gd.addChoice("Driving axis:",axes,axes[daxis]);
-			if (hpos.x >= 0 && hpos.y >= 0) {
+			gd.addStringField("Shearing factor:",shearingFactor);
+			gd.addChoice("Shearing axis:",axes,axes[shearingAxis]);
+			gd.addChoice("Driving axis:",axes,axes[drivingAxis]);
+			if (shearPosition.x >= 0 && shearPosition.y >= 0) {
 				gd.centerDialog(false);
-				gd.setLocation(hpos);
+				gd.setLocation(shearPosition);
 			} else gd.centerDialog(true);
 			gd.showDialog();
-			gd.getLocation(hpos);
+			gd.getLocation(shearPosition);
 			if (!gd.wasCanceled()) {
-				hfactor = gd.getNextString();
-				haxis = gd.getNextChoiceIndex();
-				daxis = gd.getNextChoiceIndex();
+				shearingFactor = gd.getNextString();
+				shearingAxis = gd.getNextChoiceIndex();
+				drivingAxis = gd.getNextChoiceIndex();
 				try {
 					int axis = Axes.X;
-					if (haxis == 1) axis = Axes.Y;
-					else if (haxis == 2) axis = Axes.Z;
+					if (shearingAxis == 1) axis = Axes.Y;
+					else if (shearingAxis == 2) axis = Axes.Z;
 					int drive = Axes.X;
-					if (daxis == 1) drive = Axes.Y;
-					else if (daxis == 2) drive = Axes.Z;
-					double factor = Double.parseDouble(hfactor);
-					tpr = tfm.duplicate();
-					tfm.shear(factor,axis,drive);
+					if (drivingAxis == 1) drive = Axes.Y;
+					else if (drivingAxis == 2) drive = Axes.Z;
+					double factor = Double.parseDouble(shearingFactor);
+					previousTransform = transform.duplicate();
+					transform.shear(factor,axis,drive);
 					refresh();
-					TJ.log("Sheared the matrix by a factor of "+hfactor+" in "+axes[haxis]+" by "+axes[daxis]);
+					TJ.log("Sheared the matrix by a factor of "+shearingFactor+" in "+axes[shearingAxis]+" by "+axes[drivingAxis]);
 				} catch (Exception x) {
 					TJ.error("Invalid shearing factor");
 				}
 			}
 			
-		} else if (source == trans) {
+		} else if (source == translateButton) {
 			final GenericDialog gd = new GenericDialog(TJ.name()+": Translate");
-			gd.addStringField("Translation distance:",tdistance);
-			gd.addChoice("Translation axis:",axes,axes[taxis]);
-			if (tpos.x >= 0 && tpos.y >= 0) {
+			gd.addStringField("Translation distance:",translationDistance);
+			gd.addChoice("Translation axis:",axes,axes[translationAxis]);
+			if (translatePosition.x >= 0 && translatePosition.y >= 0) {
 				gd.centerDialog(false);
-				gd.setLocation(tpos);
+				gd.setLocation(translatePosition);
 			} else gd.centerDialog(true);
 			gd.showDialog();
-			gd.getLocation(tpos);
+			gd.getLocation(translatePosition);
 			if (!gd.wasCanceled()) {
-				tdistance = gd.getNextString();
-				taxis = gd.getNextChoiceIndex();
+				translationDistance = gd.getNextString();
+				translationAxis = gd.getNextChoiceIndex();
 				try {
 					int axis = Axes.X;
-					if (taxis == 1) axis = Axes.Y;
-					else if (taxis == 2) axis = Axes.Z;
-					double distance = Double.parseDouble(tdistance);
-					tpr = tfm.duplicate();
-					tfm.translate(distance,axis);
+					if (translationAxis == 1) axis = Axes.Y;
+					else if (translationAxis == 2) axis = Axes.Z;
+					double distance = Double.parseDouble(translationDistance);
+					previousTransform = transform.duplicate();
+					transform.translate(distance,axis);
 					refresh();
-					TJ.log("Translated the matrix by "+tdistance+" in "+axes[taxis]);
+					TJ.log("Translated the matrix by "+translationDistance+" in "+axes[translationAxis]);
 				} catch (Exception x) {
 					TJ.error("Invalid translation distance");
 				}
 			}
 			
-		} else if (source == invert) {
+		} else if (source == invertButton) {
 			try {
-				final Transform tmp = tfm.duplicate();
-				tfm.invert();
+				final Transform tmp = transform.duplicate();
+				transform.invert();
 				refresh();
-				tpr = tmp;
+				previousTransform = tmp;
 				TJ.log("Inverted the matrix");
 			} catch (Throwable x) {
 				TJ.error(x.getMessage());
 			}
 			
-		} else if (source == reset) {
-			tpr = tfm.duplicate();
-			tfm.reset();
+		} else if (source == resetButton) {
+			previousTransform = transform.duplicate();
+			transform.reset();
 			refresh();
 			TJ.log("Reset the matrix to the identity matrix");
 			
-		} else if (source == copy) {
+		} else if (source == copyButton) {
 			try {
 				final StringSelection ss = new StringSelection(string("","\t","\n"));
 				Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss,this);
@@ -395,32 +402,32 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 				TJ.error("Failed to copy the matrix to the clipboard");
 			}
 			
-		} else if (source == print) {
+		} else if (source == printButton) {
 			IJ.log(string("[  ","   ","  ]\n"));
 			
-		} else if (source == undo) {
-			if (tpr != null) {
-				final Transform tmp = tfm.duplicate();
-				tfm.set(tpr);
+		} else if (source == undoButton) {
+			if (previousTransform != null) {
+				final Transform tmp = transform.duplicate();
+				transform.set(previousTransform);
 				refresh();
-				tpr = tmp;
+				previousTransform = tmp;
 				TJ.log("Undone last change");
 			}
 			
-		} else if (source == load) {
+		} else if (source == loadButton) {
 			final String file = file(FileDialog.LOAD);
 			if (file != null) try {
-				final Transform tmp = tfm.duplicate();
+				final Transform tmp = transform.duplicate();
 				load(file);
 				refresh();
-				tpr = tmp;
+				previousTransform = tmp;
 				TJ.log("Loaded matrix from "+file);
 				TJ.status("Loaded matrix from "+file);
 			} catch (Throwable x) {
 				TJ.error(x.getMessage());
 			}
 			
-		} else if (source == save) {
+		} else if (source == saveButton) {
 			final String file = file(FileDialog.SAVE);
 			if (file != null) try {
 				save(file);
@@ -430,11 +437,13 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 				TJ.error(x.getMessage());
 			}
 			
-		} else if (source == close) {
+		} else if (source == closeButton) {
 			dialog.setVisible(false);
 			dialog.dispose();
 		}
 	}
+	
+ 	public void lostOwnership(final Clipboard clip, final Transferable contents) { }
 	
 	public void focusGained(final FocusEvent e) {
 		
@@ -452,12 +461,12 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 			tf.select(0,0);
 			for (int r=0; r<4; ++r) {
 				for (int c=0; c<4; ++c) {
-					if (tfs[r][c] == tf) {
+					if (textFields[r][c] == tf) {
 						try {
 							final double d = Double.parseDouble(tf.getText());
-							if (d != tfm.get(r,c)) {
-								tpr = tfm.duplicate();
-								tfm.set(r,c,d);
+							if (d != transform.get(r,c)) {
+								previousTransform = transform.duplicate();
+								transform.set(r,c,d);
 								refresh();
 								TJ.log("Updated matrix");
 							}
@@ -472,14 +481,29 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 		}
 	}
 	
- 	public void lostOwnership(final Clipboard clip, final Transferable contents) { }
+	public void keyPressed(final KeyEvent e) { 
+		
+		final int keyCode = e.getKeyCode();
+		
+		if (keyCode == KeyEvent.VK_ESCAPE) {
+			dialog.setVisible(false);
+			dialog.dispose();
+			
+		} else if (keyCode == KeyEvent.VK_ENTER) {
+			doButton(e.getSource());
+		}
+	}
+	
+	public void keyReleased(final KeyEvent e) { }
+	
+	public void keyTyped(final KeyEvent e) { }
 	
 	public void windowActivated(final WindowEvent e) { }
 	
 	public void windowClosed(final WindowEvent e) {
 		
-		pos.x = e.getWindow().getX();
-		pos.y = e.getWindow().getY();
+		position.x = e.getWindow().getX();
+		position.y = e.getWindow().getY();
 	}
 	
 	public void windowClosing(final WindowEvent e) {
