@@ -73,6 +73,11 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 	private static int shearingAxis = 0;
 	private static int drivingAxis = 0;
 	
+	public TJ_Matrix() {
+		formatter.decs(10);
+		formatter.chop(1E-10);
+	}
+	
 	public void run(String arg) {
 		
 		if (!TJ.check()) return;
