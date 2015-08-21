@@ -93,51 +93,10 @@ public class TJ_Embed implements PlugIn, WindowListener {
 		cPosition = (int)gd.getNextNumber();
 		filling = gd.getNextChoiceIndex();
 		
-		(new TJEmbed()).run(image,xSize,ySize,zSize,tSize,cSize,xPosition,yPosition,zPosition,tPosition,cPosition,filling);
-	}
-	
-	public void windowActivated(final WindowEvent e) { }
-	
-	public void windowClosed(final WindowEvent e) {
-		
-		position.x = e.getWindow().getX();
-		position.y = e.getWindow().getY();
-	}
-	
-	public void windowClosing(final WindowEvent e) { }
-	
-	public void windowDeactivated(final WindowEvent e) { }
-	
-	public void windowDeiconified(final WindowEvent e) { }
-	
-	public void windowIconified(final WindowEvent e) { }
-	
-	public void windowOpened(final WindowEvent e) { }
-	
-}
-
-class TJEmbed {
-	
-	void run(
-		final ImagePlus image,
-		final int xSize,
-		final int ySize,
-		final int zSize,
-		final int tSize,
-		final int cSize,
-		final int xPosition,
-		final int yPosition,
-		final int zPosition,
-		final int tPosition,
-		final int cPosition,
-		final int filling
-	) {
-		
 		try {
 			final Image input = Image.wrap(image);
 			final Embed embedder = new Embed();
 			embedder.messenger.log(TJ_Options.log);
-			embedder.messenger.status(TJ_Options.progress);
 			embedder.progressor.display(TJ_Options.progress);
 			int scheme = Embed.ZERO;
 			switch (filling) {
@@ -218,5 +177,23 @@ class TJEmbed {
 		
 		return idx;
 	}
+	
+	public void windowActivated(final WindowEvent e) { }
+	
+	public void windowClosed(final WindowEvent e) {
+		
+		position.x = e.getWindow().getX();
+		position.y = e.getWindow().getY();
+	}
+	
+	public void windowClosing(final WindowEvent e) { }
+	
+	public void windowDeactivated(final WindowEvent e) { }
+	
+	public void windowDeiconified(final WindowEvent e) { }
+	
+	public void windowIconified(final WindowEvent e) { }
+	
+	public void windowOpened(final WindowEvent e) { }
 	
 }

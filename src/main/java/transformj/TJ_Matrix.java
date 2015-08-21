@@ -50,8 +50,8 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 	private Button undoButton, loadButton, saveButton, closeButton;
 	
 	private Transform previousTransform = null;
-	private static final Transform transform = new Transform();
-	private final Formatter formatter = new Formatter();
+	private static Transform transform = null;
+	private static Formatter formatter = null;
 	private String saved = null;
 	
 	private static final Point position = new Point(-1,-1);
@@ -74,8 +74,16 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 	private static int drivingAxis = 0;
 	
 	public TJ_Matrix() {
-		formatter.decs(10);
-		formatter.chop(1E-10);
+		
+		try { // In case ImageScience is not installed
+			if (transform == null)
+				transform = new Transform();
+			if (formatter == null) {
+				formatter = new Formatter();
+				formatter.decs(10);
+				formatter.chop(1E-10);
+			}
+		} catch (Throwable e) { }
 	}
 	
 	public void run(String arg) {
@@ -115,8 +123,6 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 		saveButton = addButton("Save");
 		closeButton = addButton("Close");
 		
-		formatter.decs(10);
-		formatter.chop(1E-10);
 		refresh();
 		dialog.add(panel);
 		dialog.pack();

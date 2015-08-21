@@ -62,46 +62,11 @@ public class TJ_Mirror implements PlugIn, WindowListener {
 		t = tDo ? gd.getNextBoolean() : false;
 		c = cDo ? gd.getNextBoolean() : false;
 		
-		(new TJMirror()).run(image,x,y,z,t,c);
-	}
-	
-	public void windowActivated(final WindowEvent e) { }
-	
-	public void windowClosed(final WindowEvent e) {
-		
-		position.x = e.getWindow().getX();
-		position.y = e.getWindow().getY();
-	}
-	
-	public void windowClosing(final WindowEvent e) { }
-	
-	public void windowDeactivated(final WindowEvent e) { }
-	
-	public void windowDeiconified(final WindowEvent e) { }
-	
-	public void windowIconified(final WindowEvent e) { }
-	
-	public void windowOpened(final WindowEvent e) { }
-	
-}
-
-class TJMirror {
-	
-	void run(
-		final ImagePlus image,
-		final boolean x,
-		final boolean y,
-		final boolean z,
-		final boolean t,
-		final boolean c
-	) {
-		
 		try {
 			final Image input = Image.wrap(image);
 			final Image output = input.duplicate();
 			final Mirror mirror = new Mirror();
 			mirror.messenger.log(TJ_Options.log);
-			mirror.messenger.status(TJ_Options.progress);
 			mirror.progressor.display(TJ_Options.progress);
 			mirror.run(output,new Axes(x,y,z,t,c));
 			TJ.show(output,image,mapChannels(c,image.getNChannels()));
@@ -126,5 +91,23 @@ class TJMirror {
 		}
 		return idx;
 	}
+	
+	public void windowActivated(final WindowEvent e) { }
+	
+	public void windowClosed(final WindowEvent e) {
+		
+		position.x = e.getWindow().getX();
+		position.y = e.getWindow().getY();
+	}
+	
+	public void windowClosing(final WindowEvent e) { }
+	
+	public void windowDeactivated(final WindowEvent e) { }
+	
+	public void windowDeiconified(final WindowEvent e) { }
+	
+	public void windowIconified(final WindowEvent e) { }
+	
+	public void windowOpened(final WindowEvent e) { }
 	
 }

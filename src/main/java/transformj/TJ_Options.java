@@ -29,7 +29,7 @@ public class TJ_Options implements PlugIn, WindowListener {
 		
 		final String space = "     ";
 		GenericDialog gd = new GenericDialog(TJ.name()+": Options");
-		gd.addCheckbox(" Adopt brightness/contrast from input images"+space,adopt);
+		gd.addCheckbox(" Adopt brightness and contrast from input images"+space,adopt);
 		gd.addCheckbox(" Close input images after transforming"+space,close);
 		gd.addCheckbox(" Save result images before closing"+space,save);
 		gd.addCheckbox(" Progress indication"+space,progress);
@@ -57,8 +57,8 @@ public class TJ_Options implements PlugIn, WindowListener {
 		Prefs.set("tj.progress",progress);
 		Prefs.set("tj.log",log);
 		
-		if (adopt) TJ.log("Adopting brightness/contrast from input images");
-		else TJ.log("Setting brightness/contrast based on full output range");
+		if (adopt) TJ.log("Adopting brightness and contrast from input images");
+		else TJ.log("Setting brightness and contrast based on full output range");
 		
 		if (close) TJ.log("Closing input images after transforming");
 		else TJ.log("Keeping input images after transforming");

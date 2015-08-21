@@ -29,6 +29,7 @@ public class TJ_Affine implements PlugIn, ActionListener, WindowListener {
 	private static int interpolation = 1;
 	private static String background = "0.0";
 	private static boolean adjust = true;
+	private static boolean resample = false;
 	private static boolean antialias = false;
 	
 	private Button browseButton, createButton;
@@ -73,7 +74,8 @@ public class TJ_Affine implements PlugIn, ActionListener, WindowListener {
 		gd.addChoice("Interpolation:",TJ.interpolations,TJ.interpolations[interpolation]);
 		gd.addStringField("Background:",background);
 		
-		gd.addCheckbox(" Adjust size to fit result",adjust);
+		gd.addCheckbox(" Adjust bounds to fit result",adjust);
+		gd.addCheckbox(" Resample isotropically",resample);
 		gd.addCheckbox(" Anti-alias borders",antialias);
 		
 		if (position.x >= 0 && position.y >= 0) {
@@ -89,9 +91,50 @@ public class TJ_Affine implements PlugIn, ActionListener, WindowListener {
 		interpolation = gd.getNextChoiceIndex();
 		background = gd.getNextString();
 		adjust = gd.getNextBoolean();
+		resample = gd.getNextBoolean();
 		antialias = gd.getNextBoolean();
 		
-		(new TJAffine()).run(image,file,interpolation,background,adjust,antialias);
+		try {
+			if (file == null || file.equals(""))
+				throw new IllegalArgumentException("Empty matrix file name");
+			final TJ_Matrix matrix = new TJ_Matrix();
+			matrix.load(file);
+			final Transform transform = matrix.get();
+			final Image input = Image.wrap(image);
+			final Affine affiner = new Affine();
+			affiner.messenger.log(TJ_Options.log);
+			affiner.progressor.display(TJ_Options.progress);
+			double bg; try { bg = Double.parseDouble(background); }
+			catch (Exception e) { throw new IllegalArgumentException("Invalid background value"); }
+			affiner.background = bg;
+			int scheme = Affine.NEAREST;
+			switch (interpolation) {
+				case 0: scheme = Affine.NEAREST; break;
+				case 1: scheme = Affine.LINEAR; break;
+				case 2: scheme = Affine.CUBIC; break;
+				case 3: scheme = Affine.BSPLINE3; break;
+				case 4: scheme = Affine.OMOMS3; break;
+				case 5: scheme = Affine.BSPLINE5; break;
+			}
+			final Image output = affiner.run(input,transform,scheme,adjust,resample,antialias);
+			TJ.show(output,image);
+			
+		} catch (OutOfMemoryError e) {
+			TJ.error("Not enough memory for this operation");
+			
+		} catch (UnknownError e) {
+			TJ.error("Could not create output image for some reason.\nPossibly there is not enough free memory");
+			
+		} catch (IllegalArgumentException e) {
+			TJ.error(e.getMessage());
+			
+		} catch (IllegalStateException e) {
+			TJ.error(e.getMessage());
+			
+		} catch (Throwable e) {
+			TJ.error("An unidentified error occurred while running the plugin");
+			
+		}
 	}
 	
 	public void actionPerformed(final ActionEvent e) {
@@ -135,60 +178,5 @@ public class TJ_Affine implements PlugIn, ActionListener, WindowListener {
 	public void windowIconified(final WindowEvent e) { }
 	
 	public void windowOpened(final WindowEvent e) { }
-	
-}
-
-class TJAffine {
-	
-	void run(
-		final ImagePlus image,
-		final String file,
-		final int interpolation,
-		final String background,
-		final boolean adjust,
-		final boolean antialias
-	) {
-		
-		try {
-			if (file == null || file.equals(""))
-				throw new IllegalArgumentException("Empty matrix file name");
-			final TJ_Matrix matrix = new TJ_Matrix();
-			matrix.load(file);
-			final Transform transform = matrix.get();
-			final Image input = Image.wrap(image);
-			final Affine affiner = new Affine();
-			affiner.messenger.log(TJ_Options.log);
-			affiner.messenger.status(TJ_Options.progress);
-			affiner.progressor.display(TJ_Options.progress);
-			double bg;
-			try { bg = Double.parseDouble(background); }
-			catch (Exception e) { throw new IllegalArgumentException("Invalid background value"); }
-			affiner.background = bg;
-			int scheme = Affine.NEAREST;
-			switch (interpolation) {
-				case 0: scheme = Affine.NEAREST; break;
-				case 1: scheme = Affine.LINEAR; break;
-				case 2: scheme = Affine.CUBIC; break;
-				case 3: scheme = Affine.BSPLINE3; break;
-				case 4: scheme = Affine.OMOMS3; break;
-				case 5: scheme = Affine.BSPLINE5; break;
-			}
-			final Image output = affiner.run(input,transform,scheme,adjust,antialias);
-			TJ.show(output,image);
-			
-		} catch (OutOfMemoryError e) {
-			TJ.error("Not enough memory for this operation");
-			
-		} catch (UnknownError e) {
-			TJ.error("Could not create output image for some reason.\nPossibly there is not enough free memory");
-			
-		} catch (IllegalArgumentException e) {
-			TJ.error(e.getMessage());
-			
-		} catch (Throwable e) {
-			TJ.error("An unidentified error occurred while running the plugin");
-			
-		}
-	}
 	
 }

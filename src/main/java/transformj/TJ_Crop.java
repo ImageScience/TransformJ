@@ -70,68 +70,40 @@ public class TJ_Crop implements PlugIn, WindowListener {
 		tRange = tDo ? gd.getNextString() : "1,1";
 		cRange = cDo ? gd.getNextString() : "1,1";
 		
-		(new TJCrop()).run(image,xRange,yRange,zRange,tRange,cRange);
-	}
-	
-	public void windowActivated(final WindowEvent e) { }
-	
-	public void windowClosed(final WindowEvent e) {
-		
-		position.x = e.getWindow().getX();
-		position.y = e.getWindow().getY();
-	}
-	
-	public void windowClosing(final WindowEvent e) { }
-	
-	public void windowDeactivated(final WindowEvent e) { }
-	
-	public void windowDeiconified(final WindowEvent e) { }
-	
-	public void windowIconified(final WindowEvent e) { }
-	
-	public void windowOpened(final WindowEvent e) { }
-	
-}
-
-class TJCrop {
-	
-	void run(
-		final ImagePlus image,
-		final String xRange,
-		final String yRange,
-		final String zRange,
-		final String tRange,
-		final String cRange
-	) {
-		
 		try {
-			int xStart, yStart, zStart, tStart, cStart;
-			int xStop, yStop, zStop, tStop, cStop;
-			try {
+			int xStart, xStop; try {
 				xStart = Integer.parseInt(xRange.substring(0,xRange.indexOf(',')));
 				xStop = Integer.parseInt(xRange.substring(xRange.indexOf(',')+1));
-			} catch (Exception e) { throw new IllegalArgumentException("Invalid x-range for cropping"); }
-			try {
+			} catch (Exception e) {
+				throw new IllegalArgumentException("Invalid x-range for cropping");
+			}
+			int yStart, yStop; try {
 				yStart = Integer.parseInt(yRange.substring(0,yRange.indexOf(',')));
 				yStop = Integer.parseInt(yRange.substring(yRange.indexOf(',')+1));
-			} catch (Exception e) { throw new IllegalArgumentException("Invalid y-range for cropping"); }
-			try {
+			} catch (Exception e) {
+				throw new IllegalArgumentException("Invalid y-range for cropping");
+			}
+			int zStart, zStop; try {
 				zStart = Integer.parseInt(zRange.substring(0,zRange.indexOf(','))) - 1;
 				zStop = Integer.parseInt(zRange.substring(zRange.indexOf(',')+1)) - 1;
-			} catch (Exception e) { throw new IllegalArgumentException("Invalid z-range for cropping"); }
-			try {
+			} catch (Exception e) {
+				throw new IllegalArgumentException("Invalid z-range for cropping");
+			}
+			int tStart, tStop; try {
 				tStart = Integer.parseInt(tRange.substring(0,tRange.indexOf(','))) - 1;
 				tStop = Integer.parseInt(tRange.substring(tRange.indexOf(',')+1)) - 1;
-			} catch (Exception e) { throw new IllegalArgumentException("Invalid t-range for cropping"); }
-			try {
+			} catch (Exception e) {
+				throw new IllegalArgumentException("Invalid t-range for cropping");
+			}
+			int cStart, cStop; try {
 				cStart = Integer.parseInt(cRange.substring(0,cRange.indexOf(','))) - 1;
 				cStop = Integer.parseInt(cRange.substring(cRange.indexOf(',')+1)) - 1;
-			} catch (Exception e) { throw new IllegalArgumentException("Invalid c-range for cropping"); }
-			
+			} catch (Exception e) {
+				throw new IllegalArgumentException("Invalid c-range for cropping");
+			}
 			final Image input = Image.wrap(image);
 			final Crop cropper = new Crop();
 			cropper.messenger.log(TJ_Options.log);
-			cropper.messenger.status(TJ_Options.progress);
 			cropper.progressor.display(TJ_Options.progress);
 			final Coordinates startpos = new Coordinates(xStart,yStart,zStart,tStart,cStart);
 			final Coordinates stoppos = new Coordinates(xStop,yStop,zStop,tStop,cStop);
@@ -163,5 +135,23 @@ class TJCrop {
 		}
 		return idx;
 	}
+	
+	public void windowActivated(final WindowEvent e) { }
+	
+	public void windowClosed(final WindowEvent e) {
+		
+		position.x = e.getWindow().getX();
+		position.y = e.getWindow().getY();
+	}
+	
+	public void windowClosing(final WindowEvent e) { }
+	
+	public void windowDeactivated(final WindowEvent e) { }
+	
+	public void windowDeiconified(final WindowEvent e) { }
+	
+	public void windowIconified(final WindowEvent e) { }
+	
+	public void windowOpened(final WindowEvent e) { }
 	
 }

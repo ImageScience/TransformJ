@@ -23,7 +23,7 @@ public class TJ_Panel implements PlugIn, ActionListener, WindowListener {
 	private Button affineButton, cropButton, embedButton;
 	private Button matrixButton, mirrorButton, rotateButton;
 	private Button scaleButton, translateButton, turnButton;
-	private Button aboutButton, optionsButton, websiteButton;
+	private Button aboutButton, optionsButton, helpButton;
 	
 	private static Point position = new Point(-1,-1);
 	
@@ -55,7 +55,7 @@ public class TJ_Panel implements PlugIn, ActionListener, WindowListener {
 		
 		aboutButton = addButton("About");
 		optionsButton = addButton("Options");
-		websiteButton = addButton("Website");
+		helpButton = addButton("Help");
 		
 		dialog.add(panel);
 		dialog.pack();
@@ -86,7 +86,7 @@ public class TJ_Panel implements PlugIn, ActionListener, WindowListener {
 		else if (source == turnButton) IJ.doCommand("TransformJ Turn");
 		else if (source == aboutButton) (new TJ_About()).run("");
 		else if (source == optionsButton) IJ.doCommand("TransformJ Options");
-		else if (source == websiteButton) (new TJ_Website()).run("");
+		else if (source == helpButton) (new TJ_Help()).run("");
 	}
 	
 	public void windowActivated(final WindowEvent e) { }

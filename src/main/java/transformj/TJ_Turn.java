@@ -49,7 +49,24 @@ public class TJ_Turn implements PlugIn, WindowListener {
 		yIndex = gd.getNextChoiceIndex();
 		xIndex = gd.getNextChoiceIndex();
 		
-		(new TJTurn()).run(image,zIndex,yIndex,xIndex);
+		try {
+			final Image input = Image.wrap(image);
+			final Turn turner = new Turn();
+			turner.messenger.log(TJ_Options.log);
+			turner.progressor.display(TJ_Options.progress);
+			final Image output = turner.run(input,zIndex,yIndex,xIndex);
+			TJ.show(output,image);
+			
+		} catch (OutOfMemoryError e) {
+			TJ.error("Not enough memory for this operation");
+			
+		} catch (UnknownError e) {
+			TJ.error("Could not create output image for some reason.\nPossibly there is not enough free memory");
+			
+		} catch (Throwable e) {
+			TJ.error("An unidentified error occurred while running the plugin");
+			
+		}
 	}
 	
 	public void windowActivated(final WindowEvent e) { }
@@ -69,37 +86,5 @@ public class TJ_Turn implements PlugIn, WindowListener {
 	public void windowIconified(final WindowEvent e) { }
 	
 	public void windowOpened(final WindowEvent e) { }
-	
-}
-
-class TJTurn {
-	
-	void run(
-		final ImagePlus image,
-		final int zIndex,
-		final int yIndex,
-		final int xIndex
-	) {
-		
-		try {
-			final Image input = Image.wrap(image);
-			final Turn turner = new Turn();
-			turner.messenger.log(TJ_Options.log);
-			turner.messenger.status(TJ_Options.progress);
-			turner.progressor.display(TJ_Options.progress);
-			final Image output = turner.run(input,zIndex,yIndex,xIndex);
-			TJ.show(output,image);
-			
-		} catch (OutOfMemoryError e) {
-			TJ.error("Not enough memory for this operation");
-			
-		} catch (UnknownError e) {
-			TJ.error("Could not create output image for some reason.\nPossibly there is not enough free memory");
-			
-		} catch (Throwable e) {
-			TJ.error("An unidentified error occurred while running the plugin");
-			
-		}
-	}
 	
 }

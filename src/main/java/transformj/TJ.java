@@ -9,9 +9,9 @@ import ij.measure.Calibration;
 import ij.process.ImageProcessor;
 import ij.process.LUT;
 
+import imagescience.ImageScience;
 import imagescience.image.Image;
 import imagescience.utility.I5DResource;
-import imagescience.utility.ImageScience;
 
 import java.awt.image.ColorModel;
 import java.awt.image.DirectColorModel;
@@ -31,9 +31,9 @@ public final class TJ {
 		return (version == null) ? "DEV" : version;
 	}
 	
-	private static final String MINIMUM_IMAGEJ_VERSION = "1.49a";
-		
-	private static final String MINIMUM_IMAGESCIENCE_VERSION = "2.4.0";
+	private static final String MINIMUM_IMAGEJ_VERSION = "1.50a";
+	
+	private static final String MINIMUM_IMAGESCIENCE_VERSION = "3.0.0";
 	
 	static boolean check() {
 		
@@ -42,9 +42,9 @@ public final class TJ {
 			return false;
 		}
 		
-		try {
+		try { // Also works if ImageScience is not installed
 			if (ImageScience.version().compareTo(MINIMUM_IMAGESCIENCE_VERSION) < 0)
-			throw new IllegalStateException();
+				throw new IllegalStateException();
 		} catch (Throwable e) {
 			error("This plugin requires ImageScience version "+MINIMUM_IMAGESCIENCE_VERSION+" or higher");
 			return false;
@@ -56,6 +56,7 @@ public final class TJ {
 	static ImagePlus imageplus() {
 		
 		final ImagePlus imp = WindowManager.getCurrentImage();
+		
 		if (imp == null)  {
 			error("There are no images open");
 			return null;
@@ -252,6 +253,11 @@ public final class TJ {
 		"Clamp"
 	};
 	
+	static final String[] samplings = {
+		"Current",
+		"Isotropic"
+	};
+	
 	static void options() {
 		
 		// Ensure backward compatibility with previous versions:
@@ -271,6 +277,8 @@ public final class TJ {
 		options = options.replaceAll("repeat",fillings[3]);
 		options = options.replaceAll("mirror",fillings[4]);
 		options = options.replaceAll("clamp",fillings[5]);
+		
+		options = options.replaceAll("translation","distance");
 		
 		Macro.setOptions(options);
 	}

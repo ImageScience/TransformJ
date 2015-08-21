@@ -22,6 +22,7 @@ public class TJ_Rotate implements PlugIn, WindowListener {
 	private static int interpolation = 1;
 	private static String background = "0.0";
 	private static boolean adjust = true;
+	private static boolean resample = false;
 	private static boolean antialias = false;
 	
 	private static Point position = new Point(-1,-1);
@@ -45,7 +46,8 @@ public class TJ_Rotate implements PlugIn, WindowListener {
 		gd.setInsets(15,0,5);
 		gd.addChoice("Interpolation:",TJ.interpolations,TJ.interpolations[interpolation]);
 		gd.addStringField("Background:",background);
-		gd.addCheckbox(" Adjust size to fit result",adjust);
+		gd.addCheckbox(" Adjust bounds to fit result",adjust);
+		gd.addCheckbox(" Resample isotropically",resample);
 		gd.addCheckbox(" Anti-alias borders",antialias);
 		
 		if (position.x >= 0 && position.y >= 0) {
@@ -63,49 +65,13 @@ public class TJ_Rotate implements PlugIn, WindowListener {
 		interpolation = gd.getNextChoiceIndex();
 		background = gd.getNextString();
 		adjust = gd.getNextBoolean();
+		resample = gd.getNextBoolean();
 		antialias = gd.getNextBoolean();
-		
-		(new TJRotate()).run(image,zAngle,yAngle,xAngle,interpolation,background,adjust,antialias);
-	}
-	
-	public void windowActivated(final WindowEvent e) { }
-	
-	public void windowClosed(final WindowEvent e) {
-		
-		position.x = e.getWindow().getX();
-		position.y = e.getWindow().getY();
-	}
-	
-	public void windowClosing(final WindowEvent e) { }
-	
-	public void windowDeactivated(final WindowEvent e) { }
-	
-	public void windowDeiconified(final WindowEvent e) { }
-	
-	public void windowIconified(final WindowEvent e) { }
-	
-	public void windowOpened(final WindowEvent e) { }
-	
-}
-
-class TJRotate {
-	
-	void run(
-		final ImagePlus image,
-		final String zAngle,
-		final String yAngle,
-		final String xAngle,
-		final int interpolation,
-		final String background,
-		final boolean adjust,
-		final boolean antialias
-	) {
 		
 		try {
 			final Image input = Image.wrap(image);
 			final Rotate rotator = new Rotate();
 			rotator.messenger.log(TJ_Options.log);
-			rotator.messenger.status(TJ_Options.progress);
 			rotator.progressor.display(TJ_Options.progress);
 			double za, ya, xa, bg;
 			try { za = Double.parseDouble(zAngle); }
@@ -126,7 +92,7 @@ class TJRotate {
 				case 4: scheme = Rotate.OMOMS3; break;
 				case 5: scheme = Rotate.BSPLINE5; break;
 			}
-			final Image output = rotator.run(input,za,ya,xa,scheme,adjust,antialias);
+			final Image output = rotator.run(input,za,ya,xa,scheme,adjust,resample,antialias);
 			TJ.show(output,image);
 			
 		} catch (OutOfMemoryError e) {
@@ -138,10 +104,31 @@ class TJRotate {
 		} catch (IllegalArgumentException e) {
 			TJ.error(e.getMessage());
 			
+		} catch (IllegalStateException e) {
+			TJ.error(e.getMessage());
+			
 		} catch (Throwable e) {
 			TJ.error("An unidentified error occurred while running the plugin");
 			
 		}
 	}
+	
+	public void windowActivated(final WindowEvent e) { }
+	
+	public void windowClosed(final WindowEvent e) {
+		
+		position.x = e.getWindow().getX();
+		position.y = e.getWindow().getY();
+	}
+	
+	public void windowClosing(final WindowEvent e) { }
+	
+	public void windowDeactivated(final WindowEvent e) { }
+	
+	public void windowDeiconified(final WindowEvent e) { }
+	
+	public void windowIconified(final WindowEvent e) { }
+	
+	public void windowOpened(final WindowEvent e) { }
 	
 }

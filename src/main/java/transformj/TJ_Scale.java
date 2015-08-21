@@ -4,6 +4,7 @@ import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 
+import imagescience.image.Aspects;
 import imagescience.image.Image;
 import imagescience.transform.Scale;
 import imagescience.utility.FMath;
@@ -25,6 +26,7 @@ public class TJ_Scale implements PlugIn, KeyListener, WindowListener {
 	private static String yFactor = "1.0";
 	private static String zFactor = "1.0";
 	private static int interpolation = 1;
+	private static boolean preserve = false;
 	
 	private TextField xFactorField, yFactorField, zFactorField;
 	private TextField xSizeField, ySizeField, zSizeField;
@@ -59,6 +61,8 @@ public class TJ_Scale implements PlugIn, KeyListener, WindowListener {
 		gd.addNumericField("z-Size:",d2i(image.getNSlices()*s2d(zFactor)),0,7,"slices");
 		gd.setInsets(15,0,5);
 		gd.addChoice("Interpolation:",TJ.interpolations,TJ.interpolations[interpolation]);
+		gd.setInsets(15,3,0);
+		gd.addCheckbox(" Preserve physical image dimensions",preserve);
 		
 		final Vector factors = gd.getStringFields();
 		xFactorField = (TextField)factors.get(0); xFactorField.addKeyListener(this);
@@ -83,8 +87,52 @@ public class TJ_Scale implements PlugIn, KeyListener, WindowListener {
 		yFactor = gd.getNextString();
 		zFactor = gd.getNextString();
 		interpolation = gd.getNextChoiceIndex();
+		preserve = gd.getNextBoolean();
 		
-		(new TJScale()).run(image,xFactor,yFactor,zFactor,interpolation);
+		try {
+			final Image input = Image.wrap(image);
+			final Scale scaler = new Scale();
+			scaler.messenger.log(TJ_Options.log);
+			scaler.progressor.display(TJ_Options.progress);
+			double xf=1, yf=1, zf=1, tf=1, cf=1;
+			try { xf = Double.parseDouble(xFactor); }
+			catch (Exception e) { throw new IllegalArgumentException("Invalid x-factor for scaling"); }
+			try { yf = Double.parseDouble(yFactor); }
+			catch (Exception e) { throw new IllegalArgumentException("Invalid y-factor for scaling"); }
+			try { zf = Double.parseDouble(zFactor); }
+			catch (Exception e) { throw new IllegalArgumentException("Invalid z-factor for scaling"); }
+			int scheme = Scale.NEAREST;
+			switch (interpolation) {
+				case 0: scheme = Scale.NEAREST; break;
+				case 1: scheme = Scale.LINEAR; break;
+				case 2: scheme = Scale.CUBIC; break;
+				case 3: scheme = Scale.BSPLINE3; break;
+				case 4: scheme = Scale.OMOMS3; break;
+				case 5: scheme = Scale.BSPLINE5; break;
+			}
+			final Image output = scaler.run(input,xf,yf,zf,tf,cf,scheme);
+			if (preserve) {
+				final Aspects a = input.aspects();
+				output.aspects(new Aspects(a.x/xf,a.y/yf,a.z/zf,a.t/tf,a.c/cf));
+			}
+			TJ.show(output,image);
+			
+		} catch (OutOfMemoryError e) {
+			TJ.error("Not enough memory for this operation");
+			
+		} catch (UnknownError e) {
+			TJ.error("Could not create output image for some reason.\nPossibly there is not enough free memory");
+			
+		} catch (IllegalArgumentException e) {
+			TJ.error(e.getMessage());
+			
+		} catch (IllegalStateException e) {
+			TJ.error(e.getMessage());
+			
+		} catch (Throwable e) {
+			TJ.error("An unidentified error occurred while running the plugin");
+			
+		}
 	}
 	
 	private double s2d(final String s) {
@@ -139,57 +187,5 @@ public class TJ_Scale implements PlugIn, KeyListener, WindowListener {
 	public void windowIconified(final WindowEvent e) { }
 	
 	public void windowOpened(final WindowEvent e) { }
-	
-}
-
-class TJScale {
-	
-	void run(
-		final ImagePlus image,
-		final String xFactor,
-		final String yFactor,
-		final String zFactor,
-		final int interpolation
-	) {
-		
-		try {
-			final Image input = Image.wrap(image);
-			final Scale scaler = new Scale();
-			scaler.messenger.log(TJ_Options.log);
-			scaler.messenger.status(TJ_Options.progress);
-			scaler.progressor.display(TJ_Options.progress);
-			double xf=1, yf=1, zf=1, tf=1, cf=1;
-			try { xf = Double.parseDouble(xFactor); }
-			catch (Exception e) { throw new IllegalArgumentException("Invalid x-factor for scaling"); }
-			try { yf = Double.parseDouble(yFactor); }
-			catch (Exception e) { throw new IllegalArgumentException("Invalid y-factor for scaling"); }
-			try { zf = Double.parseDouble(zFactor); }
-			catch (Exception e) { throw new IllegalArgumentException("Invalid z-factor for scaling"); }
-			int scheme = Scale.NEAREST;
-			switch (interpolation) {
-				case 0: scheme = Scale.NEAREST; break;
-				case 1: scheme = Scale.LINEAR; break;
-				case 2: scheme = Scale.CUBIC; break;
-				case 3: scheme = Scale.BSPLINE3; break;
-				case 4: scheme = Scale.OMOMS3; break;
-				case 5: scheme = Scale.BSPLINE5; break;
-			}
-			final Image output = scaler.run(input,xf,yf,zf,tf,cf,scheme);
-			TJ.show(output,image);
-			
-		} catch (OutOfMemoryError e) {
-			TJ.error("Not enough memory for this operation");
-			
-		} catch (UnknownError e) {
-			TJ.error("Could not create output image for some reason.\nPossibly there is not enough free memory");
-			
-		} catch (IllegalArgumentException e) {
-			TJ.error(e.getMessage());
-			
-		} catch (Throwable e) {
-			TJ.error("An unidentified error occurred while running the plugin");
-			
-		}
-	}
 	
 }
