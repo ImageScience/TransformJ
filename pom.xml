@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>TransformJ_</artifactId>
-	<version>4.0.0</version>
+	<version>4.0.1-SNAPSHOT</version>
 
 	<name>plugins/TransformJ_.jar</name>
 	<description />
