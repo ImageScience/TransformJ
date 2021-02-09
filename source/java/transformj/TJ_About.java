@@ -5,7 +5,11 @@ import ij.plugin.PlugIn;
 
 import java.util.Calendar;
 
+/** ImageJ plugin for showing basic information about TransformJ. */
 public class TJ_About implements PlugIn {
+	
+	/** Default constructor. */
+	public TJ_About() { }
 	
 	public void run(String arg) {
 		

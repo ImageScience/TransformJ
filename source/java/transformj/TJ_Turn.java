@@ -1,5 +1,6 @@
 package transformj;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
@@ -11,6 +12,7 @@ import java.awt.Point;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
+/** ImageJ plugin for image turning. */
 public class TJ_Turn implements PlugIn, WindowListener {
 	
 	private static final String[] angles = {"0","90","180","270"};
@@ -21,15 +23,18 @@ public class TJ_Turn implements PlugIn, WindowListener {
 	
 	private static Point position = new Point(-1,-1);
 	
+	/** Default constructor. */
+	public TJ_Turn() { }
+	
 	public void run(String arg) {
 		
 		if (!TJ.check()) return;
 		final ImagePlus image = TJ.imageplus();
 		if (image == null) return;
 		
-		TJ.log(TJ.name()+" "+TJ.version()+": Turn");
+		TJ.log(TJ.name()+" "+TJ.version()+": Turn",true);
 		
-		GenericDialog gd = new GenericDialog(TJ.name()+": Turn");
+		GenericDialog gd = new GenericDialog(TJ.name()+": Turn",IJ.getInstance());
 		gd.setInsets(0,0,0);
 		gd.addMessage("Turning angles in degrees:");
 		gd.addChoice("z-Angle:",angles,angles[zIndex]);

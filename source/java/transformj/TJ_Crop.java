@@ -1,5 +1,6 @@
 package transformj;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
@@ -14,6 +15,7 @@ import java.awt.Rectangle;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
+/** ImageJ plugin for image cropping. */
 public class TJ_Crop implements PlugIn, WindowListener {
 	
 	private static String xRange = "0,0";
@@ -24,13 +26,16 @@ public class TJ_Crop implements PlugIn, WindowListener {
 	
 	private static Point position = new Point(-1,-1);
 	
+	/** Default constructor. */
+	public TJ_Crop() { }
+	
 	public void run(String arg) {
 		
 		if (!TJ.check()) return;
 		final ImagePlus image = TJ.imageplus();
 		if (image == null) return;
 		
-		TJ.log(TJ.name()+" "+TJ.version()+": Crop");
+		TJ.log(TJ.name()+" "+TJ.version()+": Crop",true);
 		
 		final Roi roi = image.getRoi();
 		if (roi != null) {
@@ -48,7 +53,7 @@ public class TJ_Crop implements PlugIn, WindowListener {
 		boolean tDo = true; if (image.getNFrames() == 1) tDo = false;
 		boolean cDo = true; if (image.getNChannels() == 1) cDo = false;
 		
-		GenericDialog gd = new GenericDialog(TJ.name()+": Crop");
+		GenericDialog gd = new GenericDialog(TJ.name()+": Crop",IJ.getInstance());
 		if (xDo) gd.addStringField("x-Range:",xRange,10);
 		if (yDo) gd.addStringField("y-Range:",yRange,10);
 		if (zDo) gd.addStringField("z-Range:",zRange,10);

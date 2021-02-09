@@ -1,5 +1,6 @@
 package transformj;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
@@ -15,6 +16,7 @@ import java.awt.Point;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
+/** ImageJ plugin for image mirroring. */
 public class TJ_Mirror implements PlugIn, WindowListener {
 	
 	private static boolean x = false;
@@ -25,13 +27,16 @@ public class TJ_Mirror implements PlugIn, WindowListener {
 	
 	private static Point position = new Point(-1,-1);
 	
+	/** Default constructor. */
+	public TJ_Mirror() { }
+	
 	public void run(String arg) {
 		
 		if (!TJ.check()) return;
 		final ImagePlus image = TJ.imageplus();
 		if (image == null) return;
 		
-		TJ.log(TJ.name()+" "+TJ.version()+": Mirror");
+		TJ.log(TJ.name()+" "+TJ.version()+": Mirror",true);
 		
 		boolean xDo = true; if (image.getWidth() == 1) xDo = false;
 		boolean yDo = true; if (image.getHeight() == 1) yDo = false;
@@ -39,7 +44,7 @@ public class TJ_Mirror implements PlugIn, WindowListener {
 		boolean tDo = true; if (image.getNFrames() == 1) tDo = false;
 		boolean cDo = true; if (image.getNChannels() == 1) cDo = false;
 		
-		GenericDialog gd = new GenericDialog(TJ.name()+": Mirror");
+		GenericDialog gd = new GenericDialog(TJ.name()+": Mirror",IJ.getInstance());
 		if (xDo) gd.addCheckbox(" x-Mirror",x);
 		if (yDo) gd.addCheckbox(" y-Mirror",y);
 		if (zDo) gd.addCheckbox(" z-Mirror",z);

@@ -1,5 +1,6 @@
 package transformj;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.measure.Calibration;
@@ -15,6 +16,7 @@ import java.awt.Point;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
+/** ImageJ plugin for image translation. */
 public class TJ_Translate implements PlugIn, WindowListener {
 	
 	private static String xDistance = "0.0";
@@ -26,17 +28,20 @@ public class TJ_Translate implements PlugIn, WindowListener {
 	
 	private static Point position = new Point(-1,-1);
 	
+	/** Default constructor. */
+	public TJ_Translate() { }
+	
 	public void run(String arg) {
 		
 		if (!TJ.check()) return;
 		final ImagePlus image = TJ.imageplus();
 		if (image == null) return;
 		
-		TJ.log(TJ.name()+" "+TJ.version()+": Translate");
+		TJ.log(TJ.name()+" "+TJ.version()+": Translate",true);
 		
 		TJ.options();
 		
-		GenericDialog gd = new GenericDialog(TJ.name()+": Translate");
+		GenericDialog gd = new GenericDialog(TJ.name()+": Translate",IJ.getInstance());
 		gd.setInsets(0,0,0);
 		gd.addMessage("Translation distances:");
 		gd.addStringField("x-Distance:",xDistance);

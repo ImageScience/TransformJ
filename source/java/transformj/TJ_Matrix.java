@@ -40,6 +40,7 @@ import java.io.FileWriter;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+/** ImageJ plugin for creating affine transformation matrices. */
 public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusListener, KeyListener, WindowListener {
 	
 	private Dialog dialog; Panel panel;
@@ -73,6 +74,7 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 	private static int shearingAxis = 0;
 	private static int drivingAxis = 0;
 	
+	/** Default constructor. */
 	public TJ_Matrix() {
 		
 		try { // In case ImageScience is not installed
@@ -90,7 +92,7 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 		
 		if (!TJ.check()) return;
 		
-		TJ.log(TJ.name()+" "+TJ.version()+": Matrix");
+		TJ.log(TJ.name()+" "+TJ.version()+": Matrix",true);
 		
 		final Frame parent = (IJ.getInstance() != null) ? IJ.getInstance() : new Frame();
 		dialog = new Dialog(parent,TJ.name()+": Matrix",true);
@@ -192,17 +194,17 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 		return file;
 	}
 	
-	public Transform get() {
+	Transform get() {
 		
 		return transform.duplicate();
 	}
 	
-	public void set(final Transform a) {
+	void set(final Transform a) {
 		
 		transform.set(a);
 	}
 	
-	public void load(final String file) {
+	void load(final String file) {
 		
 		// Read lines:
 		final Vector<String> lines = new Vector<String>();
@@ -249,7 +251,7 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 		transform.set(matrix);
 	}
 	
-	public void save(final String file) {
+	void save(final String file) {
 		
 		try {
 			final BufferedWriter bw = new BufferedWriter(new FileWriter(file));
@@ -274,7 +276,7 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 	private void doButton(final Object source) {
 		
 		if (source == rotateButton) {
-			final GenericDialog gd = new GenericDialog(TJ.name()+": Rotate");
+			final GenericDialog gd = new GenericDialog(TJ.name()+": Rotate",IJ.getInstance());
 			gd.addStringField("Rotation angle:",rotationAngle);
 			gd.addChoice("Rotation axis:",axes,axes[rotationAxis]);
 			if (rotatePosition.x >= 0 && rotatePosition.y >= 0) {
@@ -301,7 +303,7 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 			}
 			
 		} else if (source == scaleButton) {
-			final GenericDialog gd = new GenericDialog(TJ.name()+": Scale");
+			final GenericDialog gd = new GenericDialog(TJ.name()+": Scale",IJ.getInstance());
 			gd.addStringField("Scaling factor:",scalingFactor);
 			gd.addChoice("Scaling axis:",axes,axes[scalingAxis]);
 			if (scalePosition.x >= 0 && scalePosition.y >= 0) {
@@ -328,7 +330,7 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 			}
 			
 		} else if (source == shearButton) {
-			final GenericDialog gd = new GenericDialog(TJ.name()+": Shearing");
+			final GenericDialog gd = new GenericDialog(TJ.name()+": Shearing",IJ.getInstance());
 			gd.addStringField("Shearing factor:",shearingFactor);
 			gd.addChoice("Shearing axis:",axes,axes[shearingAxis]);
 			gd.addChoice("Driving axis:",axes,axes[drivingAxis]);
@@ -360,7 +362,7 @@ public class TJ_Matrix implements PlugIn, ActionListener, ClipboardOwner, FocusL
 			}
 			
 		} else if (source == translateButton) {
-			final GenericDialog gd = new GenericDialog(TJ.name()+": Translate");
+			final GenericDialog gd = new GenericDialog(TJ.name()+": Translate",IJ.getInstance());
 			gd.addStringField("Translation distance:",translationDistance);
 			gd.addChoice("Translation axis:",axes,axes[translationAxis]);
 			if (translatePosition.x >= 0 && translatePosition.y >= 0) {

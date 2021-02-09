@@ -16,6 +16,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
+/** ImageJ plugin for launching the TransformJ panel. */
 public class TJ_Panel implements PlugIn, ActionListener, WindowListener {
 	
 	private Dialog dialog; Panel panel;
@@ -27,11 +28,14 @@ public class TJ_Panel implements PlugIn, ActionListener, WindowListener {
 	
 	private static Point position = new Point(-1,-1);
 	
+	/** Default constructor. */
+	public TJ_Panel() { }
+	
 	public void run(String arg) {
 		
 		if (!TJ.check()) return;
 		
-		TJ.log(TJ.name()+" "+TJ.version()+": Panel");
+		TJ.log(TJ.name()+" "+TJ.version()+": Panel",true);
 		
 		final Frame parent = (IJ.getInstance() != null) ? IJ.getInstance() : new Frame();
 		dialog = new Dialog(parent,TJ.name(),false);

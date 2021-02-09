@@ -23,6 +23,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 
+/** ImageJ plugin for affine image transformation. */
 public class TJ_Affine implements PlugIn, ActionListener, WindowListener {
 	
 	private static String file = "";
@@ -37,17 +38,20 @@ public class TJ_Affine implements PlugIn, ActionListener, WindowListener {
 	
 	private static Point position = new Point(-1,-1);
 	
+	/** Default constructor. */
+	public TJ_Affine() { }
+	
 	public void run(String arg) {
 		
 		if (!TJ.check()) return;
 		final ImagePlus image = TJ.imageplus();
 		if (image == null) return;
 		
-		TJ.log(TJ.name()+" "+TJ.version()+": Affine");
+		TJ.log(TJ.name()+" "+TJ.version()+": Affine",true);
 		
 		TJ.options();
 		
-		GenericDialog gd = new GenericDialog(TJ.name()+": Affine");
+		GenericDialog gd = new GenericDialog(TJ.name()+": Affine",IJ.getInstance());
 		gd.addStringField("Matrix file:",file,30);
 		fileField = (TextField)gd.getStringFields().get(0);
 		

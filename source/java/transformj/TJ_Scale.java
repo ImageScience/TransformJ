@@ -1,5 +1,6 @@
 package transformj;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
@@ -20,6 +21,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.Vector;
 
+/** ImageJ plugin for image scaling. */
 public class TJ_Scale implements PlugIn, KeyListener, WindowListener {
 	
 	private static String xFactor = "1.0";
@@ -35,17 +37,20 @@ public class TJ_Scale implements PlugIn, KeyListener, WindowListener {
 	
 	private ImagePlus image = null;
 	
+	/** Default constructor. */
+	public TJ_Scale() { }
+	
 	public void run(String arg) {
 		
 		if (!TJ.check()) return;
 		image = TJ.imageplus();
 		if (image == null) return;
 		
-		TJ.log(TJ.name()+" "+TJ.version()+": Scale");
+		TJ.log(TJ.name()+" "+TJ.version()+": Scale",true);
 		
 		TJ.options();
 		
-		GenericDialog gd = new GenericDialog(TJ.name()+": Scale");
+		GenericDialog gd = new GenericDialog(TJ.name()+": Scale",IJ.getInstance());
 		gd.setInsets(0,0,0);
 		gd.addMessage("Scaling factors for input image:");
 		gd.addStringField("x-Factor:",xFactor);

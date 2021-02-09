@@ -1,5 +1,6 @@
 package transformj;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
@@ -16,6 +17,7 @@ import java.awt.Point;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
+/** ImageJ plugin for image embedding. */
 public class TJ_Embed implements PlugIn, WindowListener {
 	
 	private static int xSize = 1024;
@@ -34,17 +36,20 @@ public class TJ_Embed implements PlugIn, WindowListener {
 	
 	private static Point position = new Point(-1,-1);
 	
+	/** Default constructor. */
+	public TJ_Embed() { }
+	
 	public void run(String arg) {
 		
 		if (!TJ.check()) return;
 		final ImagePlus image = TJ.imageplus();
 		if (image == null) return;
 		
-		TJ.log(TJ.name()+" "+TJ.version()+": Embed");
+		TJ.log(TJ.name()+" "+TJ.version()+": Embed",true);
 		
 		TJ.options();
 		
-		GenericDialog gd = new GenericDialog(TJ.name()+": Embed");
+		GenericDialog gd = new GenericDialog(TJ.name()+": Embed",IJ.getInstance());
 		gd.setInsets(0,0,5);
 		gd.addMessage("Size of output image:");
 		gd.setInsets(0,0,5);

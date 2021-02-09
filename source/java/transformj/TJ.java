@@ -17,23 +17,27 @@ import java.awt.image.ColorModel;
 import java.awt.image.DirectColorModel;
 import java.awt.image.IndexColorModel;
 
+/** TransformJ support class used by all plugins in the package. */
 public final class TJ {
 	
-	public static String name() {
+	/** Default constructor. */
+	public TJ() { }
+	
+	static String name() {
 		
 		return "TransformJ";
 	}
 	
-	public static String version() {
+	static String version() {
 		
 		final String version = TJ.class.getPackage().getImplementationVersion();
 		
 		return (version == null) ? "DEV" : version;
 	}
 	
-	private static final String MINIMUM_IMAGEJ_VERSION = "1.50a";
+	private static final String MINIMUM_IMAGEJ_VERSION = "1.53e";
 	
-	private static final String MINIMUM_IMAGESCIENCE_VERSION = "3.0.0";
+	private static final String MINIMUM_IMAGESCIENCE_VERSION = "3.1.0";
 	
 	static boolean check() {
 		
@@ -225,9 +229,20 @@ public final class TJ {
 		IJ.showStatus("");
 	}
 	
+	static void log(final String message, final boolean newlog) {
+		
+		if (TJ_Options.log) {
+			if (newlog) {
+				if (IJ.getLog() != null)
+					IJ.log(" ");
+			}
+			IJ.log(message);
+		}
+	}
+	
 	static void log(final String message) {
 		
-		if (TJ_Options.log) IJ.log(message);
+		log(message,false);
 	}
 	
 	static void status(final String message) {

@@ -1,5 +1,6 @@
 package transformj;
 
+import ij.IJ;
 import ij.Prefs;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
@@ -11,6 +12,7 @@ import java.awt.Point;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
+/** ImageJ plugin for setting the TransformJ options. */
 public class TJ_Options implements PlugIn, WindowListener {
 	
 	static boolean adopt = Prefs.get("tj.adopt",true);
@@ -21,14 +23,17 @@ public class TJ_Options implements PlugIn, WindowListener {
 	
 	private static Point position = new Point(-1,-1);
 	
+	/** Default constructor. */
+	public TJ_Options() { }
+	
 	public void run(String arg) {
 		
 		if (!TJ.check()) return;
 		
-		TJ.log(TJ.name()+" "+TJ.version()+": Options");
+		TJ.log(TJ.name()+" "+TJ.version()+": Options",true);
 		
 		final String space = "     ";
-		GenericDialog gd = new GenericDialog(TJ.name()+": Options");
+		GenericDialog gd = new GenericDialog(TJ.name()+": Options",IJ.getInstance());
 		gd.addCheckbox(" Adopt brightness and contrast from input images"+space,adopt);
 		gd.addCheckbox(" Close input images after transforming"+space,close);
 		gd.addCheckbox(" Save result images before closing"+space,save);
